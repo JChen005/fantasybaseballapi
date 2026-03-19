@@ -42,19 +42,6 @@ Admin:
 - `POST /v1/admin/data-refresh`
 - `POST /v1/admin/mock-transaction`
 
-## Deployment
-
-The repo includes a Render Blueprint at [`render.yaml`](./render.yaml).
-
-Recommended production setup:
-
-- Deploy `player-api` as a separate Render web service.
-- Point `MONGODB_URI` at a hosted MongoDB instance such as Atlas.
-- Set the shared `PLAYER_API_LICENSE_KEY` in both the Player API and the DraftKit backend.
-- Set `PLAYER_API_LICENSE_CONSUMER` to the DraftKit app name you want stored in the local license record.
-
-The service seeds player data from the CSV files under `player-api/data/nl` on startup when `AUTO_SEED=true`.
-
 ## Notes
 
 - Player list/search/detail routes use lightweight in-memory caching to reduce repeated reads on cheap hosting plans.
