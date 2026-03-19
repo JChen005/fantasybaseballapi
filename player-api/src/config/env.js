@@ -2,8 +2,6 @@ const REQUIRED_ENV_KEYS = [
   'MONGODB_URI',
   'ADMIN_SECRET',
   'PLAYER_API_LICENSE_KEY',
-  'PLAYER_API_LICENSE_CONSUMER',
-  'AUTO_SEED',
 ];
 
 function requireEnv(key) {
@@ -14,8 +12,13 @@ function requireEnv(key) {
   return String(value).trim();
 }
 
-function parseBooleanEnv(key) {
-  const normalized = requireEnv(key).toLowerCase();
+function parseBooleanEnv(key, defaultValue = false) {
+  const rawValue = process.env[key];
+  if (!rawValue || !String(rawValue).trim()) {
+    return defaultValue;
+  }
+
+  const normalized = String(rawValue).trim().toLowerCase();
   if (normalized !== 'true' && normalized !== 'false') {
     throw new Error(`${key} must be either "true" or "false"`);
   }

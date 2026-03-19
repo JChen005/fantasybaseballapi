@@ -9,7 +9,8 @@ function withLeagueFilter(leagueType) {
 async function listPlayers({ limit = 200, leagueType = null } = {}) {
   return Player.find(withLeagueFilter(leagueType))
     .sort({ baseValue: -1, canonicalName: 1, name: 1 })
-    .limit(limit);
+    .limit(limit)
+    .lean();
 }
 
 async function searchPlayers({ escapedQuery, includeDrafted, limit = 200, leagueType = null }) {
@@ -30,11 +31,12 @@ async function searchPlayers({ escapedQuery, includeDrafted, limit = 200, league
 
   return Player.find(query)
     .sort({ baseValue: -1, canonicalName: 1, name: 1 })
-    .limit(limit);
+    .limit(limit)
+    .lean();
 }
 
 async function getPlayerById(playerId) {
-  const player = await Player.findById(playerId);
+  const player = await Player.findById(playerId).lean();
   if (!player) {
     throw new AppError('Player not found', 404);
   }
@@ -51,7 +53,7 @@ async function getPlayerTransactions(playerId) {
 }
 
 async function getLeagueAverages() {
-  const players = await Player.find({ isCustom: false }).limit(500);
+  const players = await Player.find({ isCustom: false }).select('statsLastYear').limit(500).lean();
   if (players.length === 0) {
     return { averages: null, sampleSize: 0 };
   }
@@ -111,9 +113,6 @@ function getOpenApiDoc() {
       },
       '/v1/stats/league-averages': {
         get: { summary: 'League averages', security: [{ ApiKeyAuth: [] }] },
-      },
-      '/v1/valuation/suggest': {
-        post: { summary: 'Get valuation suggestion', security: [{ ApiKeyAuth: [] }] },
       },
       '/v1/stream/transactions': {
         get: { summary: 'SSE stream for player transactions', security: [{ ApiKeyAuth: [] }] },

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: draftkit-player-api
+    env: node
+    rootDir: player-api
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: AUTO_SEED
+        value: true
+      - key: PLAYER_API_LICENSE_CONSUMER
+        value: DraftKit Web App
+      - key: MONGODB_URI
+        sync: false
+      - key: ADMIN_SECRET
+        sync: false
+      - key: PLAYER_API_LICENSE_KEY
+        sync: false

@@ -11,7 +11,7 @@ async function bootstrap() {
   validatePlayerApiEnv();
   await connectDb();
 
-  if (parseBooleanEnv('AUTO_SEED')) {
+  if (parseBooleanEnv('AUTO_SEED', true)) {
     await ensureSeedData({ force: false });
   }
 
@@ -22,7 +22,7 @@ async function bootstrap() {
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
       console.error(
-        `Port ${port} is already in use. Set a different PORT in apps/player-api/.env and update DraftKit env URLs to match.`
+        `Port ${port} is already in use. Set a different PORT in player-api/.env or on your hosting platform and update the DraftKit API URL to match.`
       );
       process.exit(1);
     }

@@ -8,6 +8,7 @@ const {
   buildTransactionEvent,
   publishTransactionEvent,
 } = require('../services/transactionStreamService');
+const { invalidateCatalogCache } = require('../services/catalogCache');
 const { asyncHandler } = require('../utils/asyncHandler');
 const { AppError } = require('../utils/appError');
 
@@ -42,6 +43,7 @@ router.post(
   requireAdminSecret,
   asyncHandler(async (req, res) => {
     const result = await ensureSeedData({ force: true });
+    invalidateCatalogCache();
     res.json({
       success: true,
       inserted: result.inserted,
@@ -91,6 +93,11 @@ router.post(
       ? [...player.transactions, transactionEntry].slice(-30)
       : [transactionEntry];
     await player.save();
+    invalidateCatalogCache(`player:${player._id}`);
+    invalidateCatalogCache(`transactions:${player._id}`);
+    invalidateCatalogCache('players:');
+    invalidateCatalogCache('search:');
+    invalidateCatalogCache('league-averages');
 
     const eventPayload = buildTransactionEvent({
       playerId: player._id,

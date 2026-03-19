@@ -11,9 +11,17 @@ function requireEnv(key) {
   return String(value).trim();
 }
 
+function getOptionalEnv(key, fallback) {
+  const value = process.env[key];
+  if (!value || !String(value).trim()) {
+    return fallback;
+  }
+  return String(value).trim();
+}
+
 async function ensureSeedLicense() {
   const rawApiKey = requireEnv('PLAYER_API_LICENSE_KEY');
-  const consumerName = requireEnv('PLAYER_API_LICENSE_CONSUMER');
+  const consumerName = getOptionalEnv('PLAYER_API_LICENSE_CONSUMER', 'DraftKit Web App');
   const keyHash = hashApiKey(rawApiKey);
 
   const license = await License.findOneAndUpdate(
