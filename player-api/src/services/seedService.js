@@ -2,6 +2,7 @@ const Player = require('../models/Player');
 const License = require('../models/License');
 const { loadCsvSeedPlayers } = require('../data/csvSeedPlayers');
 const { hashApiKey, makeKeyPreview } = require('./licenseService');
+const { enrichPlayersWithMlbData } = require('./mlbStatsService');
 
 function requireEnv(key) {
   const value = process.env[key];
@@ -79,13 +80,45 @@ async function ensureSeedData({ force = false } = {}) {
   }
 
   const seedPlayers = loadCsvSeedPlayers();
-  const inserted = await Player.insertMany(seedPlayers);
+  const season = Number(new Date().getFullYear());
+  let playersToInsert = seedPlayers;
+  let mlbEnrichment = {
+    enabled: true,
+    matchedCount: 0,
+    rosterPlayerCount: 0,
+    season,
+    failed: false,
+  };
+
+  try {
+    const result = await enrichPlayersWithMlbData(seedPlayers, { season });
+    playersToInsert = result.players;
+    mlbEnrichment = {
+      enabled: true,
+      matchedCount: result.matchedCount,
+      rosterPlayerCount: result.rosterPlayerCount,
+      season: result.season,
+      failed: false,
+    };
+  } catch (error) {
+    console.warn(`MLB enrichment skipped: ${error.message}`);
+    mlbEnrichment = {
+      enabled: true,
+      matchedCount: 0,
+      rosterPlayerCount: 0,
+      season,
+      failed: true,
+    };
+  }
+
+  const inserted = await Player.insertMany(playersToInsert);
   const seededLicense = await ensureSeedLicense();
   return {
     inserted: inserted.length,
     count: inserted.length,
     skipped: false,
     seededLicense,
+    mlbEnrichment,
   };
 }
 

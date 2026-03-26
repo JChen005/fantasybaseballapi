@@ -28,6 +28,8 @@ const playerSchema = new mongoose.Schema(
     name: { type: String, required: true, index: true },
     canonicalName: { type: String, required: true, index: true },
     sourcePlayerKey: { type: String, required: true },
+    mlbPlayerId: { type: Number, index: true },
+    mlbTeamId: { type: Number, index: true },
     team: { type: String, required: true, index: true },
     mlbLeague: {
       type: String,
@@ -45,6 +47,9 @@ const playerSchema = new mongoose.Schema(
     baseValue: { type: Number, required: true },
     isCustom: { type: Boolean, default: false },
     isDrafted: { type: Boolean, default: false },
+    headshotUrl: { type: String, default: '' },
+    dataSources: { type: [String], default: ['csv'] },
+    lastSyncedAt: { type: Date },
     transactions: { type: [transactionSchema], default: [] },
   },
   {
