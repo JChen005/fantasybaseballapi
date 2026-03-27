@@ -5,6 +5,7 @@ const {
   parseLimit,
   parseSearchQuery,
   parseLeagueType,
+  parseIncludeInactive,
   validatePlayerId,
 } = require('../validators/requestValidators');
 const {
@@ -37,9 +38,10 @@ router.get(
   asyncHandler(async (req, res) => {
     const limit = parseLimit(req.query.limit, 200);
     const leagueType = parseLeagueType(req.query.leagueType);
-    const key = `players:${limit}:${leagueType || 'MIXED'}`;
+    const includeInactive = parseIncludeInactive(req.query.includeInactive);
+    const key = `players:${limit}:${leagueType || 'MIXED'}:${includeInactive ? 'all' : 'active'}`;
     const players = await withCatalogCache(key, CACHE_TTLS_MS.players, () =>
-      listPlayers({ limit, leagueType })
+      listPlayers({ limit, leagueType, includeInactive })
     );
     res.json({ players });
   })

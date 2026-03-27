@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Player = require('../models/Player');
 const { AppError } = require('../utils/appError');
 
@@ -6,16 +7,24 @@ function withLeagueFilter(leagueType) {
   return { mlbLeague: leagueType };
 }
 
-async function listPlayers({ limit = 200, leagueType = null } = {}) {
-  return Player.find(withLeagueFilter(leagueType))
+function withActiveFilter(includeInactive) {
+  return includeInactive ? {} : { isActiveRoster: true };
+}
+
+async function listPlayers({ limit = 200, leagueType = null, includeInactive = false } = {}) {
+  return Player.find({
+    ...withLeagueFilter(leagueType),
+    ...withActiveFilter(includeInactive),
+  })
     .sort({ baseValue: -1, canonicalName: 1, name: 1 })
     .limit(limit)
     .lean();
 }
 
-async function searchPlayers({ escapedQuery, includeDrafted, limit = 200, leagueType = null }) {
+async function searchPlayers({ escapedQuery, includeDrafted, includeInactive = false, limit = 200, leagueType = null }) {
   const query = {
     ...withLeagueFilter(leagueType),
+    ...withActiveFilter(includeInactive),
     ...(includeDrafted ? {} : { isDrafted: false }),
     ...(escapedQuery
       ? {
@@ -35,8 +44,20 @@ async function searchPlayers({ escapedQuery, includeDrafted, limit = 200, league
     .lean();
 }
 
+function buildPlayerLookup(playerId) {
+  if (typeof playerId === 'number') {
+    return { mlbPlayerId: playerId };
+  }
+
+  if (mongoose.isValidObjectId(playerId)) {
+    return { _id: playerId };
+  }
+
+  return { mlbPlayerId: Number(playerId) };
+}
+
 async function getPlayerById(playerId) {
-  const player = await Player.findById(playerId).lean();
+  const player = await Player.findOne(buildPlayerLookup(playerId)).lean();
   if (!player) {
     throw new AppError('Player not found', 404);
   }
@@ -46,14 +67,14 @@ async function getPlayerById(playerId) {
 async function getPlayerTransactions(playerId) {
   const player = await getPlayerById(playerId);
   return {
-    playerId: player._id,
+    playerId: player.mlbPlayerId,
     playerName: player.name,
     transactions: Array.isArray(player.transactions) ? player.transactions : [],
   };
 }
 
 async function getLeagueAverages() {
-  const players = await Player.find({ isCustom: false }).select('statsLastYear').limit(500).lean();
+  const players = await Player.find({ isCustom: false, isActiveRoster: true }).select('statsLastYear').limit(500).lean();
   if (players.length === 0) {
     return { averages: null, sampleSize: 0 };
   }

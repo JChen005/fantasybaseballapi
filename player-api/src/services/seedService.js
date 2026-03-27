@@ -1,8 +1,9 @@
 const Player = require('../models/Player');
 const License = require('../models/License');
-const { loadCsvSeedPlayers } = require('../data/csvSeedPlayers');
 const { hashApiKey, makeKeyPreview } = require('./licenseService');
-const { enrichPlayersWithMlbData } = require('./mlbStatsService');
+const { loadMlbSeedPlayers } = require('./mlbStatsService');
+
+const DEFAULT_MAX_PLAYER_AGE_MINUTES = 60;
 
 function requireEnv(key) {
   const value = process.env[key];
@@ -18,6 +19,20 @@ function getOptionalEnv(key, fallback) {
     return fallback;
   }
   return String(value).trim();
+}
+
+function getMaxPlayerAgeMs() {
+  const raw = process.env.PLAYER_SYNC_MAX_AGE_MINUTES;
+  if (!raw || !String(raw).trim()) {
+    return DEFAULT_MAX_PLAYER_AGE_MINUTES * 60 * 1000;
+  }
+
+  const minutes = Number(raw);
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    throw new Error('PLAYER_SYNC_MAX_AGE_MINUTES must be a positive number');
+  }
+
+  return Math.floor(minutes * 60 * 1000);
 }
 
 async function ensureSeedLicense() {
@@ -53,72 +68,117 @@ async function ensureSeedLicense() {
   };
 }
 
-async function ensureSeedData({ force = false } = {}) {
+async function getSeedStatus() {
   const existingCount = await Player.countDocuments();
-
-  if (existingCount > 0 && !force) {
-    const hasLeagueField = await Player.exists({ mlbLeague: { $in: ['AL', 'NL'] } });
-    const missingRequiredFieldsCount = await Player.countDocuments({
-      $or: [
-        { canonicalName: { $exists: false } },
-        { canonicalName: '' },
-        { sourcePlayerKey: { $exists: false } },
-        { sourcePlayerKey: '' },
-        { statsProjection: { $exists: false } },
-      ],
-    });
-
-    if (hasLeagueField && missingRequiredFieldsCount === 0) {
-      const seededLicense = await ensureSeedLicense();
-      return { inserted: 0, count: existingCount, skipped: true, seededLicense };
-    }
-    force = true;
+  if (existingCount === 0) {
+    return {
+      count: 0,
+      shouldSeed: true,
+      reason: 'empty',
+      newestSyncAt: null,
+    };
   }
+
+  const newestPlayer = await Player.findOne({ lastSyncedAt: { $exists: true, $ne: null } })
+    .sort({ lastSyncedAt: -1 })
+    .select('lastSyncedAt')
+    .lean();
+
+  if (!newestPlayer?.lastSyncedAt) {
+    return {
+      count: existingCount,
+      shouldSeed: true,
+      reason: 'missing-sync-timestamp',
+      newestSyncAt: null,
+    };
+  }
+
+  const newestSyncAt = new Date(newestPlayer.lastSyncedAt);
+  const isStale = Date.now() - newestSyncAt.getTime() >= getMaxPlayerAgeMs();
+
+  return {
+    count: existingCount,
+    shouldSeed: isStale,
+    reason: isStale ? 'stale' : 'fresh',
+    newestSyncAt: newestSyncAt.toISOString(),
+  };
+}
+
+async function softReseedPlayers() {
+  const result = await loadMlbSeedPlayers();
+  const seenIds = [];
+
+  for (const player of result.players) {
+    seenIds.push(player.mlbPlayerId);
+    await Player.updateOne(
+      { mlbPlayerId: player.mlbPlayerId },
+      {
+        $set: {
+          ...player,
+          isActiveRoster: true,
+          lastSeenInSyncAt: player.lastSeenInSyncAt || player.lastSyncedAt,
+        },
+      },
+      { upsert: true }
+    );
+  }
+
+  const inactiveResult = await Player.updateMany(
+    { mlbPlayerId: { $nin: seenIds } },
+    {
+      $set: {
+        isActiveRoster: false,
+        lastSyncedAt: new Date(),
+      },
+    }
+  );
+
+  const totalCount = await Player.countDocuments();
+
+  return {
+    inserted: result.players.length,
+    count: totalCount,
+    skipped: false,
+    markedInactive: inactiveResult.modifiedCount,
+    mlbSeed: {
+      enabled: true,
+      season: result.season,
+      rosterPlayerCount: result.rosterPlayerCount,
+    },
+  };
+}
+
+async function ensureSeedData({ force = false } = {}) {
+  const seededLicense = await ensureSeedLicense();
 
   if (force) {
-    await Player.deleteMany({});
-  }
-
-  const seedPlayers = loadCsvSeedPlayers();
-  const season = Number(new Date().getFullYear());
-  let playersToInsert = seedPlayers;
-  let mlbEnrichment = {
-    enabled: true,
-    matchedCount: 0,
-    rosterPlayerCount: 0,
-    season,
-    failed: false,
-  };
-
-  try {
-    const result = await enrichPlayersWithMlbData(seedPlayers, { season });
-    playersToInsert = result.players;
-    mlbEnrichment = {
-      enabled: true,
-      matchedCount: result.matchedCount,
-      rosterPlayerCount: result.rosterPlayerCount,
-      season: result.season,
-      failed: false,
-    };
-  } catch (error) {
-    console.warn(`MLB enrichment skipped: ${error.message}`);
-    mlbEnrichment = {
-      enabled: true,
-      matchedCount: 0,
-      rosterPlayerCount: 0,
-      season,
-      failed: true,
+    const result = await softReseedPlayers();
+    return {
+      ...result,
+      seededLicense,
+      reason: 'forced',
     };
   }
 
-  const inserted = await Player.insertMany(playersToInsert);
-  const seededLicense = await ensureSeedLicense();
+  const seedStatus = await getSeedStatus();
+  if (!seedStatus.shouldSeed) {
+    return {
+      inserted: 0,
+      count: seedStatus.count,
+      skipped: true,
+      seededLicense,
+      reason: seedStatus.reason,
+      newestSyncAt: seedStatus.newestSyncAt,
+    };
+  }
+
+  const result = await softReseedPlayers();
   return {
-    inserted: inserted.length,
-    count: inserted.length,
-    skipped: false,
+    ...result,
     seededLicense,
-    mlbEnrichment,
+    reason: seedStatus.reason,
+    previousCount: seedStatus.count,
+    previousNewestSyncAt: seedStatus.newestSyncAt,
   };
 }
 

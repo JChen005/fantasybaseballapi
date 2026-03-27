@@ -27,8 +27,7 @@ const playerSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, index: true },
     canonicalName: { type: String, required: true, index: true },
-    sourcePlayerKey: { type: String, required: true },
-    mlbPlayerId: { type: Number, index: true },
+    mlbPlayerId: { type: Number, required: true },
     mlbTeamId: { type: Number, index: true },
     team: { type: String, required: true, index: true },
     mlbLeague: {
@@ -43,12 +42,13 @@ const playerSchema = new mongoose.Schema(
     depthRole: { type: String, default: 'STARTER' },
     statsLastYear: { type: statSchema, required: true },
     stats3Year: { type: statSchema, required: true },
-    statsProjection: { type: statSchema, required: true },
     baseValue: { type: Number, required: true },
     isCustom: { type: Boolean, default: false },
     isDrafted: { type: Boolean, default: false },
+    isActiveRoster: { type: Boolean, default: true, index: true },
     headshotUrl: { type: String, default: '' },
-    dataSources: { type: [String], default: ['csv'] },
+    dataSources: { type: [String], default: ['mlbStatsApi'] },
+    lastSeenInSyncAt: { type: Date, index: true },
     lastSyncedAt: { type: Date },
     transactions: { type: [transactionSchema], default: [] },
   },
@@ -58,11 +58,11 @@ const playerSchema = new mongoose.Schema(
 );
 
 playerSchema.index(
-  { sourcePlayerKey: 1 },
+  { mlbPlayerId: 1 },
   {
     unique: true,
     partialFilterExpression: {
-      sourcePlayerKey: { $type: 'string' },
+      mlbPlayerId: { $type: 'number' },
     },
   }
 );
