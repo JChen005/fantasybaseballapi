@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Player = require('../models/Player');
 const { AppError } = require('../utils/appError');
+const { getTeamDepthChart: fetchTeamDepthChart } = require('./mlbStatsService');
 
 function withLeagueFilter(leagueType) {
   if (!leagueType) return {};
@@ -9,6 +10,189 @@ function withLeagueFilter(leagueType) {
 
 function withActiveFilter(includeInactive) {
   return includeInactive ? {} : { isActiveRoster: true };
+}
+
+function buildExcludedPlayerFilter(excludedPlayers = []) {
+  const objectIds = [];
+  const mlbPlayerIds = [];
+
+  for (const entry of excludedPlayers) {
+    if (typeof entry.playerId === 'string' && mongoose.isValidObjectId(entry.playerId)) {
+      objectIds.push(new mongoose.Types.ObjectId(entry.playerId));
+      continue;
+    }
+
+    const numericId = Number(entry.playerId);
+    if (Number.isInteger(numericId) && numericId > 0) {
+      mlbPlayerIds.push(numericId);
+    }
+  }
+
+  if (!objectIds.length && !mlbPlayerIds.length) {
+    return null;
+  }
+
+  const clauses = [];
+  if (objectIds.length) {
+    clauses.push({ _id: { $nin: objectIds } });
+  }
+  if (mlbPlayerIds.length) {
+    clauses.push({ mlbPlayerId: { $nin: mlbPlayerIds } });
+  }
+
+  return clauses.length === 1 ? clauses[0] : { $and: clauses };
+}
+
+function withSearchFilter(escapedQuery) {
+  if (!escapedQuery) return {};
+
+  return {
+    $or: [
+      { name: { $regex: escapedQuery, $options: 'i' } },
+      { canonicalName: { $regex: escapedQuery, $options: 'i' } },
+      { team: { $regex: escapedQuery, $options: 'i' } },
+      { positions: { $regex: escapedQuery, $options: 'i' } },
+    ],
+  };
+}
+
+function getRosterShape(rosterSlots = {}) {
+  const totalSlots = Object.values(rosterSlots).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const benchSlots = Number(rosterSlots.BN) || 0;
+  const starterSlots = Math.max(0, totalSlots - benchSlots);
+
+  return {
+    totalSlots,
+    starterSlots,
+    benchSlots,
+  };
+}
+
+function getOpenSlots(rosterSlots = {}, filledSlots = {}) {
+  const openSlots = {};
+
+  for (const [slot, total] of Object.entries(rosterSlots)) {
+    openSlots[slot] = Math.max(0, (Number(total) || 0) - (Number(filledSlots[slot]) || 0));
+  }
+
+  return openSlots;
+}
+
+function normalizePositionToken(position) {
+  const normalized = String(position || '').trim().toUpperCase();
+  if (normalized === '1B' || normalized === 'B1') return 'B1';
+  if (normalized === '2B' || normalized === 'B2') return 'B2';
+  if (normalized === '3B' || normalized === 'B3') return 'B3';
+  if (normalized === 'SP' || normalized === 'RP' || normalized === 'P') return 'P';
+  return normalized;
+}
+
+function getEligibleRosterSlots(player) {
+  const rawPositions = Array.isArray(player.positions) ? player.positions : [];
+  const normalizedPositions = new Set(
+    rawPositions
+      .map(normalizePositionToken)
+      .filter((position) => ['C', 'B1', 'B2', 'B3', 'SS', 'OF', 'P', 'UTIL', 'TWOWAYPLAYER'].includes(position))
+  );
+
+  const eligibleSlots = new Set();
+  if (normalizedPositions.has('C')) eligibleSlots.add('C');
+  if (normalizedPositions.has('B1')) eligibleSlots.add('B1');
+  if (normalizedPositions.has('B2')) eligibleSlots.add('B2');
+  if (normalizedPositions.has('B3')) eligibleSlots.add('B3');
+  if (normalizedPositions.has('SS')) eligibleSlots.add('SS');
+  if (normalizedPositions.has('OF')) eligibleSlots.add('OF');
+  if (normalizedPositions.has('P') || normalizedPositions.has('TWOWAYPLAYER')) eligibleSlots.add('P');
+
+  const isHitterEligible = [...normalizedPositions].some((position) => ['C', 'B1', 'B2', 'B3', 'SS', 'OF'].includes(position));
+  const isPitcherOnly = eligibleSlots.has('P') && !isHitterEligible;
+  if (!isPitcherOnly && (isHitterEligible || normalizedPositions.has('TWOWAYPLAYER') || normalizedPositions.has('UTIL'))) {
+    eligibleSlots.add('UTIL');
+  }
+
+  return [...eligibleSlots];
+}
+
+function getTeamFit(player, openSlots, hasFilledSlots) {
+  if (!hasFilledSlots) {
+    return {
+      fillsNeed: false,
+      eligibleSlots: getEligibleRosterSlots(player),
+      teamFitMultiplier: 1,
+    };
+  }
+
+  const eligibleSlots = getEligibleRosterSlots(player);
+  const fillsNeed = eligibleSlots.some((slot) => (Number(openSlots[slot]) || 0) > 0);
+
+  return {
+    fillsNeed,
+    eligibleSlots,
+    teamFitMultiplier: fillsNeed ? 1.18 : 0.82,
+  };
+}
+
+function getReplacementLevel(players, slotCount) {
+  if (!slotCount || !players.length) return 0;
+  const cappedIndex = Math.min(players.length, slotCount) - 1;
+  return Math.max(0, Number(players[cappedIndex]?.baseValue) || 0);
+}
+
+function buildAuctionPool(players, league) {
+  const rosterShape = getRosterShape(league.rosterSlots);
+  const dollarablePoolShare = Number.isFinite(Number(league.dollarablePoolShare))
+    ? Number(league.dollarablePoolShare)
+    : 0.3;
+  const poolSize = Math.max(1, Math.round(rosterShape.starterSlots * league.teamCount * dollarablePoolShare));
+  const sortedPlayers = [...players].sort((left, right) => right.baseValue - left.baseValue || left.name.localeCompare(right.name));
+  const replacementLevel = getReplacementLevel(sortedPlayers, poolSize);
+  const rosterablePlayers = new Set(sortedPlayers.slice(0, poolSize).map((player) => String(player._id)));
+
+  return {
+    rosterShape,
+    poolSize,
+    replacementLevel,
+    rosterablePlayers,
+  };
+}
+
+function buildMarketPool(players, league) {
+  const rosterShape = getRosterShape(league.rosterSlots);
+  const marketPoolShare = Math.max(
+    Number.isFinite(Number(league.dollarablePoolShare)) ? Number(league.dollarablePoolShare) : 0.3,
+    0.5
+  );
+  const poolSize = Math.max(1, Math.round(rosterShape.starterSlots * league.teamCount * marketPoolShare));
+  const sortedPlayers = [...players].sort((left, right) => right.baseValue - left.baseValue || left.name.localeCompare(right.name));
+  const replacementLevel = getReplacementLevel(sortedPlayers, poolSize);
+  const rosterablePlayers = new Set(sortedPlayers.slice(0, poolSize).map((player) => String(player._id)));
+
+  return {
+    poolSize,
+    replacementLevel,
+    rosterablePlayers,
+  };
+}
+
+function computeAuctionBaseValue(player, auctionPool) {
+  const playerId = String(player._id);
+  const rosterable = auctionPool.rosterablePlayers.has(playerId);
+
+  if (!rosterable) {
+    return {
+      rosterable: false,
+      auctionBaseValue: 0,
+      replacementLevel: auctionPool.replacementLevel,
+    };
+  }
+
+  const replacementLevel = auctionPool.replacementLevel;
+
+  return {
+    rosterable: true,
+    auctionBaseValue: Math.max(0, Number((Number(player.baseValue || 0) - replacementLevel).toFixed(2))),
+    replacementLevel,
+  };
 }
 
 async function listPlayers({ limit = 200, leagueType = null, includeInactive = false } = {}) {
@@ -26,16 +210,7 @@ async function searchPlayers({ escapedQuery, includeDrafted, includeInactive = f
     ...withLeagueFilter(leagueType),
     ...withActiveFilter(includeInactive),
     ...(includeDrafted ? {} : { isDrafted: false }),
-    ...(escapedQuery
-      ? {
-          $or: [
-            { name: { $regex: escapedQuery, $options: 'i' } },
-            { canonicalName: { $regex: escapedQuery, $options: 'i' } },
-            { team: { $regex: escapedQuery, $options: 'i' } },
-            { positions: { $regex: escapedQuery, $options: 'i' } },
-          ],
-        }
-      : {}),
+    ...withSearchFilter(escapedQuery),
   };
 
   return Player.find(query)
@@ -48,11 +223,9 @@ function buildPlayerLookup(playerId) {
   if (typeof playerId === 'number') {
     return { mlbPlayerId: playerId };
   }
-
   if (mongoose.isValidObjectId(playerId)) {
     return { _id: playerId };
   }
-
   return { mlbPlayerId: Number(playerId) };
 }
 
@@ -80,7 +253,6 @@ async function getLeagueAverages() {
   }
 
   const toNumber = (value) => (Number.isFinite(Number(value)) ? Number(value) : 0);
-
   const total = players.reduce(
     (acc, player) => {
       const stats = player.statsLastYear || {};
@@ -105,14 +277,205 @@ async function getLeagueAverages() {
   };
 }
 
+async function getTeamDepthChart(teamId, season) {
+  return fetchTeamDepthChart({ teamId, season });
+}
+
+function toMarketWeight(auctionBaseValue) {
+  const normalizedValue = Number(auctionBaseValue) || 0;
+  if (normalizedValue <= 0) return 0;
+  return Math.pow(normalizedValue, 0.6);
+}
+
+function getMarketEliteValueTarget(budget) {
+  const normalizedBudget = Number(budget) || 0;
+  if (normalizedBudget <= 0) return 0;
+  return Math.max(10, Math.round(normalizedBudget * 0.17));
+}
+
+function getBudgetAdjustmentFactor({ remainingBudget, remainingRosterSpots, budget, totalSlots }) {
+  const safeRemainingRosterSpots = Number(remainingRosterSpots) || 0;
+  const safeTotalSlots = Number(totalSlots) || 0;
+  const safeRemainingBudget = Number(remainingBudget) || 0;
+  const safeBudget = Number(budget) || 0;
+
+  if (safeRemainingRosterSpots <= 0 || safeTotalSlots <= 0 || safeRemainingBudget <= 0 || safeBudget <= 0) {
+    return 0;
+  }
+
+  const currentDollarsPerSlot = safeRemainingBudget / safeRemainingRosterSpots;
+  const baselineDollarsPerSlot = safeBudget / safeTotalSlots;
+  if (baselineDollarsPerSlot <= 0) return 0;
+
+  const rawFactor = currentDollarsPerSlot / baselineDollarsPerSlot;
+  return Math.min(1.25, Math.max(0.65, Number(rawFactor.toFixed(3))));
+}
+
+async function getValuationSnapshot({
+  league,
+  filters,
+  draftState,
+}) {
+  const poolQueryBase = {
+    ...withLeagueFilter(league.leagueType),
+    ...withActiveFilter(filters.includeInactive),
+    isDrafted: false,
+  };
+
+  const excludedFilter = buildExcludedPlayerFilter(draftState.excludedPlayers);
+  const poolQuery = excludedFilter
+    ? { $and: [poolQueryBase, excludedFilter] }
+    : poolQueryBase;
+  const playerListQuery = filters.escapedSearch
+    ? {
+        $and: [
+          poolQuery,
+          withSearchFilter(filters.escapedSearch),
+        ],
+      }
+    : poolQuery;
+
+  const [players, poolPlayers] = await Promise.all([
+    Player.find(playerListQuery)
+      .sort({ baseValue: -1, canonicalName: 1, name: 1 })
+      .limit(filters.limit)
+      .lean(),
+    Player.find(poolQuery)
+      .select({
+        _id: 1,
+        name: 1,
+        baseValue: 1,
+        positions: 1,
+        eligibility: 1,
+      })
+      .lean(),
+  ]);
+
+  const auctionPool = buildAuctionPool(poolPlayers, league);
+  const marketPool = buildMarketPool(poolPlayers, league);
+  const auctionDetailsById = new Map(
+    poolPlayers.map((player) => {
+      const details = computeAuctionBaseValue(player, auctionPool);
+      return [String(player._id), details];
+    })
+  );
+  const marketDetailsById = new Map(
+    poolPlayers.map((player) => {
+      const playerId = String(player._id);
+      const rosterable = marketPool.rosterablePlayers.has(playerId);
+      const marketAuctionBaseValue = rosterable
+        ? Math.max(0, Number((Number(player.baseValue || 0) - marketPool.replacementLevel).toFixed(2)))
+        : 0;
+
+      return [playerId, {
+        rosterable,
+        marketAuctionBaseValue,
+      }];
+    })
+  );
+
+  const maxRemainingMarketAuctionWeight = Number(
+    poolPlayers
+      .reduce((max, player) => {
+        const marketAuctionBaseValue = marketDetailsById.get(String(player._id))?.marketAuctionBaseValue || 0;
+        return Math.max(max, toMarketWeight(marketAuctionBaseValue));
+      }, 0)
+      .toFixed(2)
+  );
+  const spentBudget = draftState.excludedPlayers
+    .filter((entry) => entry.countsAgainstBudget)
+    .reduce((sum, entry) => sum + entry.cost, 0);
+  const remainingBudget = Math.max(0, league.budget - spentBudget);
+  const rosterShape = auctionPool.rosterShape;
+  const filledRosterSpots = draftState.excludedPlayers.filter((entry) => entry.countsAgainstBudget).length;
+  const remainingRosterSpots = Math.max(0, rosterShape.totalSlots - filledRosterSpots);
+  const surplusBudget = Math.max(0, remainingBudget - remainingRosterSpots);
+  const maxBid = remainingRosterSpots > 0 ? Math.max(0, remainingBudget - (remainingRosterSpots - 1)) : 0;
+  const budgetAdjustmentFactor = getBudgetAdjustmentFactor({
+    remainingBudget,
+    remainingRosterSpots,
+    budget: league.budget,
+    totalSlots: rosterShape.totalSlots,
+  });
+  const openSlots = getOpenSlots(league.rosterSlots, draftState.filledSlots);
+  const hasFilledSlots = Object.keys(draftState.filledSlots).length > 0;
+  const marketEliteValueTarget = getMarketEliteValueTarget(league.budget);
+
+  return {
+    valuation: {
+      remainingBudget,
+      remainingRosterSpots,
+      surplusBudget,
+      maxBid,
+      maxRemainingMarketAuctionWeight,
+      replacementLevel: Number(auctionPool.replacementLevel.toFixed(2)),
+      rosterablePoolSize: auctionPool.poolSize,
+      startersPerTeam: rosterShape.starterSlots,
+      benchPerTeam: rosterShape.benchSlots,
+      marketEliteValueTarget,
+      budgetAdjustmentFactor,
+      openSlots,
+    },
+    players: players.map((player) => {
+      const auctionDetails = auctionDetailsById.get(String(player._id)) || {
+        auctionBaseValue: 0,
+        rosterable: false,
+        replacementLevel: 0,
+      };
+
+      let adjustedValue = 0;
+      let marketValue = 0;
+      const teamFit = getTeamFit(player, openSlots, hasFilledSlots);
+      if (auctionDetails.rosterable) {
+        const marketDetails = marketDetailsById.get(String(player._id)) || {
+          rosterable: false,
+          marketAuctionBaseValue: 0,
+        };
+        if (marketDetails.rosterable) {
+          marketValue = 1;
+          const marketWeight = toMarketWeight(marketDetails.marketAuctionBaseValue);
+          if (marketWeight > 0 && maxRemainingMarketAuctionWeight > 0 && marketEliteValueTarget > 0) {
+            marketValue = Math.max(
+              1,
+              Math.round((marketWeight / maxRemainingMarketAuctionWeight) * marketEliteValueTarget)
+            );
+          }
+        }
+        if (marketValue > 0 && budgetAdjustmentFactor > 0) {
+          adjustedValue = Math.max(1, Math.round(marketValue * budgetAdjustmentFactor * teamFit.teamFitMultiplier));
+        } else if (auctionDetails.auctionBaseValue > 0) {
+          adjustedValue = 1;
+        }
+        adjustedValue = Math.min(adjustedValue, maxBid);
+      } else {
+        // Below-replacement players still show as $1 endgame options in the auction UI.
+        marketValue = 1;
+        adjustedValue = Math.min(1, maxBid);
+      }
+
+      return {
+        ...player,
+        auctionBaseValue: auctionDetails.auctionBaseValue,
+        marketValue,
+        replacementLevel: auctionDetails.replacementLevel,
+        rosterable: auctionDetails.rosterable,
+        fillsNeed: teamFit.fillsNeed,
+        eligibleRosterSlots: teamFit.eligibleSlots,
+        teamFitMultiplier: teamFit.teamFitMultiplier,
+        maxBid,
+        adjustedValue,
+      };
+    }),
+  };
+}
+
 function getOpenApiDoc() {
   return {
     openapi: '3.0.0',
     info: {
       title: 'DraftKit Player API',
       version: '0.1.0',
-      description:
-        'Licensed player and valuation API for DraftKit, including push updates via Server-Sent Events.',
+      description: 'Licensed player and valuation API for DraftKit, including push updates via Server-Sent Events.',
     },
     components: {
       securitySchemes: {
@@ -127,17 +490,13 @@ function getOpenApiDoc() {
       '/v1/health': { get: { summary: 'Health check' } },
       '/v1/license/status': { get: { summary: 'License status', security: [{ ApiKeyAuth: [] }] } },
       '/v1/players': { get: { summary: 'List players', security: [{ ApiKeyAuth: [] }] } },
+      '/v1/valuations/players': { post: { summary: 'League-aware player valuations', security: [{ ApiKeyAuth: [] }] } },
       '/v1/players/search': { get: { summary: 'Search players', security: [{ ApiKeyAuth: [] }] } },
       '/v1/players/{playerId}': { get: { summary: 'Player details', security: [{ ApiKeyAuth: [] }] } },
-      '/v1/players/{playerId}/transactions': {
-        get: { summary: 'Player transactions', security: [{ ApiKeyAuth: [] }] },
-      },
-      '/v1/stats/league-averages': {
-        get: { summary: 'League averages', security: [{ ApiKeyAuth: [] }] },
-      },
-      '/v1/stream/transactions': {
-        get: { summary: 'SSE stream for player transactions', security: [{ ApiKeyAuth: [] }] },
-      },
+      '/v1/players/{playerId}/transactions': { get: { summary: 'Player transactions', security: [{ ApiKeyAuth: [] }] } },
+      '/v1/stats/league-averages': { get: { summary: 'League averages', security: [{ ApiKeyAuth: [] }] } },
+      '/v1/teams/{teamId}/depth-chart': { get: { summary: 'Team depth chart', security: [{ ApiKeyAuth: [] }] } },
+      '/v1/stream/transactions': { get: { summary: 'SSE stream for player transactions', security: [{ ApiKeyAuth: [] }] } },
       '/v1/admin/mock-transaction': { post: { summary: 'Publish mock transaction (admin secret)' } },
       '/v1/admin/data-refresh': { post: { summary: 'Refresh seed data' } },
     },
@@ -145,10 +504,12 @@ function getOpenApiDoc() {
 }
 
 module.exports = {
-  listPlayers,
-  searchPlayers,
-  getPlayerById,
-  getPlayerTransactions,
   getLeagueAverages,
   getOpenApiDoc,
+  getPlayerById,
+  getPlayerTransactions,
+  getTeamDepthChart,
+  getValuationSnapshot,
+  listPlayers,
+  searchPlayers,
 };

@@ -22,7 +22,7 @@ async function bootstrap() {
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
       console.error(
-        `Port ${port} is already in use. Set a different PORT in player-api/.env or on your hosting platform and update the DraftKit API URL to match.`
+        `Port ${port} is already in use. Set a different PORT in player-api/.env or on the hosting platform and update the DraftKit API URL to match.`
       );
       process.exit(1);
     }

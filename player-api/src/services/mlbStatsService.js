@@ -1,164 +1,37 @@
-const MLB_STATS_API_BASE = 'https://statsapi.mlb.com/api/v1';
-const MLB_HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload/w_213,q_100/v1/people';
-const MLB_SPORT_ID = 1;
-const PEOPLE_BATCH_SIZE = 25;
-const STATS_HYDRATE = 'stats(group=[hitting,pitching],type=[season,yearByYear])';
-
-const AL_TEAMS = new Set([
-  'BAL',
-  'BOS',
-  'NYY',
-  'TB',
-  'TOR',
-  'CHW',
-  'CLE',
-  'DET',
-  'KC',
-  'MIN',
-  'HOU',
-  'LAA',
-  'ATH',
-  'OAK',
-  'SEA',
-  'TEX',
-]);
-
-const POSITION_MAP = {
-  C: 'C',
-  '1B': '1B',
-  '2B': '2B',
-  '3B': '3B',
-  SS: 'SS',
-  LF: 'OF',
-  CF: 'OF',
-  RF: 'OF',
-  OF: 'OF',
-  DH: 'UTIL',
-  UT: 'UTIL',
-  UTIL: 'UTIL',
-  TWP: 'P',
-  SP: 'P',
-  RP: 'P',
-  P: 'P',
-};
-
-function normalizeWhitespace(value) {
-  return String(value || '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function normalizeTeamCode(value) {
-  return normalizeWhitespace(value).toUpperCase();
-}
-
-function buildHeadshotUrl(playerId) {
-  return `${MLB_HEADSHOT_BASE}/${playerId}/headshot/67/current`;
-}
-
-async function fetchJson(url) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`MLB API request failed (${response.status}): ${url}`);
-  }
-  return response.json();
-}
-
-async function fetchMlbTeams({ season }) {
-  const url = `${MLB_STATS_API_BASE}/teams?sportId=${MLB_SPORT_ID}&season=${season}`;
-  const payload = await fetchJson(url);
-  return Array.isArray(payload.teams) ? payload.teams : [];
-}
-
-async function fetchActiveRosterForTeam({ teamId, season }) {
-  const url = `${MLB_STATS_API_BASE}/teams/${teamId}/roster?rosterType=active&season=${season}`;
-  const payload = await fetchJson(url);
-  return Array.isArray(payload.roster) ? payload.roster : [];
-}
-
-function normalizePosition(value) {
-  const token = normalizeWhitespace(value).toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (!token) return '';
-  return POSITION_MAP[token] || token;
-}
-
-function toLeague(teamCode) {
-  return AL_TEAMS.has(teamCode) ? 'AL' : 'NL';
-}
+const {
+  buildHeadshotUrl,
+  fetchActiveRosterForTeam,
+  fetchDepthChartForTeam,
+  fetchMlbTeams,
+  fetchPeopleStats,
+  normalizeTeamCode,
+  normalizeWhitespace,
+  toLeague,
+} = require('./mlbStatsClient');
+const {
+  buildDepthIndex,
+  buildDepthRoleFromEntry,
+  buildEligibility,
+  isStarterPremiumSlot,
+  normalizeDepthChart,
+} = require('./depthChartService');
 
 function toNumber(value, digits = null) {
   const numeric = Number(value);
-  if (!Number.isFinite(numeric)) {
-    return 0;
-  }
+  if (!Number.isFinite(numeric)) return 0;
   return digits == null ? numeric : Number(numeric.toFixed(digits));
 }
 
 function emptyStats() {
-  return {
-    hr: 0,
-    rbi: 0,
-    sb: 0,
-    avg: 0,
-    w: 0,
-    k: 0,
-    era: 0,
-    whip: 0,
-  };
-}
-
-function buildEligibility(position, positionName) {
-  const values = [normalizePosition(position), normalizePosition(positionName)].filter(Boolean);
-  const eligibility = Array.from(new Set(values));
-  return eligibility.length > 0 ? eligibility : ['UTIL'];
-}
-
-function buildDepthRole(positionType) {
-  const normalized = normalizeWhitespace(positionType).toLowerCase();
-  if (normalized.includes('pitcher')) return 'PITCHER';
-  if (normalized.includes('outfield')) return 'OUTFIELDER';
-  if (normalized.includes('infield')) return 'INFIELDER';
-  return 'STARTER';
+  return { hr: 0, rbi: 0, sb: 0, avg: 0, w: 0, k: 0, era: 0, whip: 0 };
 }
 
 function buildTransaction(player, season) {
-  return [
-    {
-      date: `${season}-01-01`,
-      type: 'Roster Sync',
-      detail: `${player.name} synced from MLB Stats API active rosters.`,
-    },
-  ];
-}
-
-function chunk(values, size) {
-  const chunks = [];
-  for (let index = 0; index < values.length; index += size) {
-    chunks.push(values.slice(index, index + size));
-  }
-  return chunks;
-}
-
-function statsHydrateParam() {
-  return encodeURIComponent(STATS_HYDRATE);
-}
-
-async function fetchPeopleStats(personIds) {
-  const ids = personIds.filter(Boolean);
-  if (ids.length === 0) return new Map();
-
-  const batches = chunk(ids, PEOPLE_BATCH_SIZE);
-  const people = [];
-
-  for (const batch of batches) {
-    const url = `${MLB_STATS_API_BASE}/people?personIds=${batch.join(',')}&hydrate=${statsHydrateParam()}`;
-    const payload = await fetchJson(url);
-    if (Array.isArray(payload.people)) {
-      people.push(...payload.people);
-    }
-  }
-
-  return new Map(people.map((person) => [person.id, person]));
+  return [{
+    date: `${season}-01-01`,
+    type: 'Roster Sync',
+    detail: `${player.name} synced from MLB Stats API active roster and depth chart data.`,
+  }];
 }
 
 function getStatSplits(person, { group, type }) {
@@ -168,10 +41,35 @@ function getStatSplits(person, { group, type }) {
       normalizeWhitespace(entry?.group?.displayName).toLowerCase() === group &&
       normalizeWhitespace(entry?.type?.displayName).toLowerCase() === type
   );
-
   return Array.isArray(statGroup?.splits)
     ? statGroup.splits.filter((split) => split?.gameType === 'R')
     : [];
+}
+
+function parseInningsPitchedToOuts(value) {
+  const normalized = String(value || '').trim();
+  if (!normalized) return 0;
+
+  const [whole = '0', partial = '0'] = normalized.split('.');
+  const outsFromWhole = Number(whole) * 3;
+  const outsFromPartial = Number(partial);
+  if (!Number.isFinite(outsFromWhole) || !Number.isFinite(outsFromPartial)) return 0;
+  return outsFromWhole + outsFromPartial;
+}
+
+function emptySeasonAggregate() {
+  return {
+    hr: 0,
+    rbi: 0,
+    sb: 0,
+    w: 0,
+    k: 0,
+    battingHits: 0,
+    battingAtBats: 0,
+    pitchingEarnedRuns: 0,
+    pitchingOuts: 0,
+    pitchingWhipBaserunners: 0,
+  };
 }
 
 function mapHittingSplit(split) {
@@ -180,11 +78,13 @@ function mapHittingSplit(split) {
     hr: toNumber(stat.homeRuns),
     rbi: toNumber(stat.rbi),
     sb: toNumber(stat.stolenBases),
-    avg: toNumber(stat.avg, 3),
     w: 0,
     k: toNumber(stat.strikeOuts),
-    era: 0,
-    whip: 0,
+    battingHits: toNumber(stat.hits),
+    battingAtBats: toNumber(stat.atBats),
+    pitchingEarnedRuns: 0,
+    pitchingOuts: 0,
+    pitchingWhipBaserunners: 0,
   };
 }
 
@@ -194,69 +94,84 @@ function mapPitchingSplit(split) {
     hr: 0,
     rbi: 0,
     sb: 0,
-    avg: 0,
     w: toNumber(stat.wins),
     k: toNumber(stat.strikeOuts),
-    era: toNumber(stat.era, 2),
-    whip: toNumber(stat.whip, 2),
+    battingHits: 0,
+    battingAtBats: 0,
+    pitchingEarnedRuns: toNumber(stat.earnedRuns),
+    pitchingOuts: parseInningsPitchedToOuts(stat.inningsPitched),
+    pitchingWhipBaserunners: toNumber(stat.baseOnBalls) + toNumber(stat.hits),
   };
 }
 
-function mergeStatBlocks(...blocks) {
-  return blocks.reduce(
-    (accumulator, block) => ({
-      hr: accumulator.hr + toNumber(block?.hr),
-      rbi: accumulator.rbi + toNumber(block?.rbi),
-      sb: accumulator.sb + toNumber(block?.sb),
-      avg: Math.max(accumulator.avg, toNumber(block?.avg, 3)),
-      w: accumulator.w + toNumber(block?.w),
-      k: accumulator.k + toNumber(block?.k),
-      era: accumulator.era > 0 ? Math.min(accumulator.era, toNumber(block?.era, 2) || accumulator.era) : toNumber(block?.era, 2),
-      whip: accumulator.whip > 0 ? Math.min(accumulator.whip, toNumber(block?.whip, 2) || accumulator.whip) : toNumber(block?.whip, 2),
+function mergeSeasonAggregates(...aggregates) {
+  return aggregates.reduce(
+    (accumulator, aggregate) => ({
+      hr: accumulator.hr + toNumber(aggregate?.hr),
+      rbi: accumulator.rbi + toNumber(aggregate?.rbi),
+      sb: accumulator.sb + toNumber(aggregate?.sb),
+      w: accumulator.w + toNumber(aggregate?.w),
+      k: accumulator.k + toNumber(aggregate?.k),
+      battingHits: accumulator.battingHits + toNumber(aggregate?.battingHits),
+      battingAtBats: accumulator.battingAtBats + toNumber(aggregate?.battingAtBats),
+      pitchingEarnedRuns: accumulator.pitchingEarnedRuns + toNumber(aggregate?.pitchingEarnedRuns),
+      pitchingOuts: accumulator.pitchingOuts + toNumber(aggregate?.pitchingOuts),
+      pitchingWhipBaserunners: accumulator.pitchingWhipBaserunners + toNumber(aggregate?.pitchingWhipBaserunners),
     }),
-    emptyStats()
+    emptySeasonAggregate()
   );
-}
-
-function averageStatBlocks(blocks) {
-  if (blocks.length === 0) return emptyStats();
-
-  const total = blocks.reduce(
-    (accumulator, block) => ({
-      hr: accumulator.hr + block.hr,
-      rbi: accumulator.rbi + block.rbi,
-      sb: accumulator.sb + block.sb,
-      avg: accumulator.avg + block.avg,
-      w: accumulator.w + block.w,
-      k: accumulator.k + block.k,
-      era: accumulator.era + block.era,
-      whip: accumulator.whip + block.whip,
-    }),
-    emptyStats()
-  );
-
-  return {
-    hr: Number((total.hr / blocks.length).toFixed(2)),
-    rbi: Number((total.rbi / blocks.length).toFixed(2)),
-    sb: Number((total.sb / blocks.length).toFixed(2)),
-    avg: Number((total.avg / blocks.length).toFixed(3)),
-    w: Number((total.w / blocks.length).toFixed(2)),
-    k: Number((total.k / blocks.length).toFixed(2)),
-    era: Number((total.era / blocks.length).toFixed(2)),
-    whip: Number((total.whip / blocks.length).toFixed(2)),
-  };
-}
-
-function sortSplitsBySeasonDesc(splits) {
-  return [...splits].sort((left, right) => Number(right.season) - Number(left.season));
 }
 
 function getSeasonSplit(splits, season) {
-  return splits.find((split) => Number(split?.season) === Number(season)) || null;
+  const normalizedSeason = String(season);
+  return splits.find((split) => String(split?.season || '') === normalizedSeason) || null;
 }
 
 function getCompletedSeasonSplits(splits, currentSeason) {
-  return sortSplitsBySeasonDesc(splits).filter((split) => Number(split?.season) < Number(currentSeason));
+  return splits
+    .filter((split) => {
+      const season = Number(split?.season);
+      return Number.isInteger(season) && season < currentSeason;
+    })
+    .sort((left, right) => Number(right?.season || 0) - Number(left?.season || 0));
+}
+
+function aggregateToDisplayStats(aggregate, seasonsCount = 1) {
+  const divisor = Math.max(1, seasonsCount);
+  const avg = aggregate.battingAtBats > 0 ? aggregate.battingHits / aggregate.battingAtBats : 0;
+  const era = aggregate.pitchingOuts > 0 ? (aggregate.pitchingEarnedRuns * 27) / aggregate.pitchingOuts : 0;
+  const whip = aggregate.pitchingOuts > 0 ? (aggregate.pitchingWhipBaserunners * 3) / aggregate.pitchingOuts : 0;
+
+  return {
+    hr: Number((aggregate.hr / divisor).toFixed(2)),
+    rbi: Number((aggregate.rbi / divisor).toFixed(2)),
+    sb: Number((aggregate.sb / divisor).toFixed(2)),
+    avg: Number(avg.toFixed(3)),
+    w: Number((aggregate.w / divisor).toFixed(2)),
+    k: Number((aggregate.k / divisor).toFixed(2)),
+    era: Number(era.toFixed(2)),
+    whip: Number(whip.toFixed(2)),
+  };
+}
+
+function hasAnyStats(aggregate) {
+  return Object.values(aggregate).some((value) => value > 0);
+}
+
+function buildSeasonAggregate(hittingSplit, pitchingSplit) {
+  return mergeSeasonAggregates(mapHittingSplit(hittingSplit), mapPitchingSplit(pitchingSplit));
+}
+
+function buildAverageAggregate(hittingSplits, pitchingSplits, maxSeasons) {
+  const seasons = Array.from({ length: Math.max(hittingSplits.length, pitchingSplits.length, 0) })
+    .slice(0, maxSeasons)
+    .map((_, index) => buildSeasonAggregate(hittingSplits[index], pitchingSplits[index]))
+    .filter(hasAnyStats);
+
+  return {
+    aggregate: seasons.reduce((accumulator, seasonAggregate) => mergeSeasonAggregates(accumulator, seasonAggregate), emptySeasonAggregate()),
+    seasonsCount: seasons.length,
+  };
 }
 
 function buildPlayerStats(person, season) {
@@ -265,44 +180,82 @@ function buildPlayerStats(person, season) {
   const hittingYearByYear = getStatSplits(person, { group: 'hitting', type: 'yearbyyear' });
   const pitchingYearByYear = getStatSplits(person, { group: 'pitching', type: 'yearbyyear' });
 
-  const currentHitting = getSeasonSplit(hittingSeasonSplits, season);
-  const currentPitching = getSeasonSplit(pitchingSeasonSplits, season);
-
+  const currentAggregate = buildSeasonAggregate(
+    getSeasonSplit(hittingSeasonSplits, season),
+    getSeasonSplit(pitchingSeasonSplits, season)
+  );
   const completedHitting = getCompletedSeasonSplits(hittingYearByYear, season);
   const completedPitching = getCompletedSeasonSplits(pitchingYearByYear, season);
+  const lastYearAggregate = buildSeasonAggregate(completedHitting[0], completedPitching[0]);
+  const threeYearAggregate = buildAverageAggregate(completedHitting, completedPitching, 3);
 
-  const lastYear = mergeStatBlocks(
-    mapHittingSplit(completedHitting[0]),
-    mapPitchingSplit(completedPitching[0])
-  );
-
-  const threeYear = averageStatBlocks(
-    Array.from({ length: Math.max(completedHitting.length, completedPitching.length, 0) })
-      .slice(0, 3)
-      .map((_, index) =>
-        mergeStatBlocks(
-          mapHittingSplit(completedHitting[index]),
-          mapPitchingSplit(completedPitching[index])
-        )
-      )
-      .filter((block) => Object.values(block).some((value) => value > 0))
-  );
-
-  const projection = mergeStatBlocks(
-    mapHittingSplit(currentHitting),
-    mapPitchingSplit(currentPitching)
-  );
+  const statsLastYear = hasAnyStats(lastYearAggregate)
+    ? aggregateToDisplayStats(lastYearAggregate)
+    : aggregateToDisplayStats(currentAggregate);
+  const stats3Year = threeYearAggregate.seasonsCount > 0
+    ? aggregateToDisplayStats(threeYearAggregate.aggregate, threeYearAggregate.seasonsCount)
+    : statsLastYear;
 
   return {
-    statsLastYear: Object.values(lastYear).some((value) => value > 0) ? lastYear : projection,
-    stats3Year: Object.values(threeYear).some((value) => value > 0) ? threeYear : lastYear,
+    statsLastYear,
+    stats3Year,
   };
 }
 
-function computeBaseValue(stats) {
-  const hitterValue = stats.hr * 4 + stats.rbi + stats.sb * 2 + stats.avg * 100;
-  const pitcherValue = stats.w * 6 + stats.k * 0.5 - stats.era * 2 - stats.whip * 3;
-  return Number(Math.max(1, hitterValue + pitcherValue).toFixed(2));
+function getDepthContextMultiplier({ depthRank, primarySlot, positions = [] } = {}) {
+  const normalizedPositions = positions.map((position) => String(position).toUpperCase());
+
+  let multiplier = 1;
+  if (depthRank === 1 && isStarterPremiumSlot(primarySlot)) multiplier *= 1.75;
+  else if (depthRank === 2) multiplier *= 1.25;
+  else if (depthRank === 3) multiplier *= 0.75;
+  else if (Number.isInteger(depthRank) && depthRank >= 4) multiplier *= 0.45;
+  if (normalizedPositions.includes('TWOWAYPLAYER')) multiplier *= 1.35;
+
+  return multiplier;
+}
+
+function computeBaseValue(stats, { depthRank, primarySlot, positions = [] } = {}) {
+  const hitterValue =
+    stats.hr * 8 +
+    stats.rbi * 1.8 +
+    stats.sb * 4 +
+    stats.avg * 420;
+  const pitcherValue =
+    stats.w * 7 +
+    stats.k * 1.6 -
+    stats.era * 30 -
+    stats.whip * 45;
+  const weightedRawValue = Math.max(1, hitterValue + pitcherValue) * getDepthContextMultiplier({ depthRank, primarySlot, positions });
+  const scaledBaseValue = Math.pow(weightedRawValue / 3, 1.7);
+
+  return Number(Math.max(1, scaledBaseValue).toFixed(2));
+}
+
+async function fetchTeamRosterSnapshot({ teamId, teamCode, season }) {
+  let activeRoster = [];
+  let depthEntries = [];
+
+  try {
+    activeRoster = await fetchActiveRosterForTeam({ teamId, season });
+  } catch (error) {
+    console.warn(`Failed to fetch active roster for team ${teamId}: ${error.message}`);
+  }
+
+  try {
+    depthEntries = await fetchDepthChartForTeam({ teamId });
+  } catch (error) {
+    console.warn(`Failed to fetch depth chart for team ${teamId}: ${error.message}`);
+  }
+
+  return {
+    activeRoster,
+    activeRosterIds: new Set(activeRoster.map((entry) => entry?.person?.id).filter(Boolean)),
+    depthEntries,
+    depthIndex: buildDepthIndex(depthEntries),
+    teamCode,
+    teamId,
+  };
 }
 
 async function fetchMlbRosterPlayers({ season }) {
@@ -314,28 +267,29 @@ async function fetchMlbRosterPlayers({ season }) {
     const teamCode = normalizeTeamCode(team.abbreviation || team.teamCode || team.fileCode);
     if (!teamId || !teamCode) continue;
 
-    let roster = [];
-    try {
-      roster = await fetchActiveRosterForTeam({ teamId, season });
-    } catch (error) {
-      console.warn(`Failed to fetch roster for team ${teamId}: ${error.message}`);
-      continue;
-    }
-
-    for (const entry of roster) {
+    const snapshot = await fetchTeamRosterSnapshot({ teamId, teamCode, season });
+    for (const entry of snapshot.activeRoster) {
       if (!entry?.person?.id) continue;
       rosterEntries.push({
         entry,
         teamId,
         teamCode,
+        depthInfo: snapshot.depthIndex.get(entry.person.id) || null,
       });
     }
   }
 
   const peopleById = await fetchPeopleStats(rosterEntries.map(({ entry }) => entry.person.id));
 
-  return rosterEntries.map(({ entry, teamId, teamCode }) => {
-    const positions = buildEligibility(entry.position?.abbreviation || entry.position?.code, entry.position?.name || entry.position?.type);
+  return rosterEntries.map(({ entry, teamId, teamCode, depthInfo }) => {
+    const positionInputs = [
+      entry.position?.abbreviation,
+      entry.position?.code,
+      entry.position?.name,
+      entry.position?.type,
+      ...(depthInfo?.positions || []),
+    ];
+    const positions = buildEligibility(positionInputs);
     const person = peopleById.get(entry.person.id);
     const playerStats = buildPlayerStats(person, season);
 
@@ -348,14 +302,18 @@ async function fetchMlbRosterPlayers({ season }) {
       mlbLeague: toLeague(teamCode),
       positions,
       eligibility: positions,
-      injuryStatus: 'HEALTHY',
-      depthRole: buildDepthRole(entry.position?.type),
+      injuryStatus: normalizeWhitespace(depthInfo?.status || entry.status?.description || 'HEALTHY') || 'HEALTHY',
+      depthRole: depthInfo?.depthRole || buildDepthRoleFromEntry(entry),
       ...playerStats,
-      baseValue: computeBaseValue(playerStats.statsLastYear),
+      baseValue: computeBaseValue(playerStats.statsLastYear, {
+        depthRank: Number.isInteger(depthInfo?.depthRank) ? depthInfo.depthRank : null,
+        primarySlot: depthInfo?.primarySlot || null,
+        positions,
+      }),
       isCustom: false,
       isDrafted: false,
       headshotUrl: buildHeadshotUrl(entry.person.id),
-      dataSources: ['mlbStatsApi'],
+      dataSources: ['mlbStatsApi', 'mlbDepthChart'],
       isActiveRoster: true,
       lastSeenInSyncAt: new Date(),
       lastSyncedAt: new Date(),
@@ -368,7 +326,7 @@ function dedupePlayers(players, season) {
   const uniquePlayers = [];
 
   for (const player of players) {
-    const key = String(player.mlbPlayerId || "");
+    const key = String(player.mlbPlayerId || '');
     if (!key || seen.has(key)) continue;
     seen.add(key);
     uniquePlayers.push({
@@ -385,9 +343,8 @@ function dedupePlayers(players, season) {
 async function loadMlbSeedPlayers({ season = new Date().getFullYear() } = {}) {
   const players = await fetchMlbRosterPlayers({ season });
   const dedupedPlayers = dedupePlayers(players, season);
-
   if (dedupedPlayers.length === 0) {
-    throw new Error('No seed players were produced from MLB Stats API active rosters.');
+    throw new Error('No seed players were produced from MLB Stats API roster and depth chart data.');
   }
 
   return {
@@ -397,7 +354,30 @@ async function loadMlbSeedPlayers({ season = new Date().getFullYear() } = {}) {
   };
 }
 
+async function getTeamDepthChart({ teamId, season = new Date().getFullYear() } = {}) {
+  const teams = await fetchMlbTeams({ season });
+  const team = teams.find((candidate) => candidate.id === teamId);
+  if (!team) {
+    throw new Error(`MLB team not found for teamId=${teamId}`);
+  }
+
+  const teamCode = normalizeTeamCode(team.abbreviation || team.teamCode || team.fileCode);
+  const snapshot = await fetchTeamRosterSnapshot({ teamId, teamCode, season });
+
+  return {
+    team: {
+      id: teamId,
+      code: teamCode,
+      name: normalizeWhitespace(team.name || team.teamName || ''),
+      league: toLeague(teamCode),
+    },
+    season,
+    slots: normalizeDepthChart(snapshot.depthEntries, snapshot.activeRosterIds),
+  };
+}
+
 module.exports = {
-  loadMlbSeedPlayers,
   buildHeadshotUrl,
+  getTeamDepthChart,
+  loadMlbSeedPlayers,
 };

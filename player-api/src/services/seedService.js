@@ -4,6 +4,77 @@ const { hashApiKey, makeKeyPreview } = require('./licenseService');
 const { loadMlbSeedPlayers } = require('./mlbStatsService');
 
 const DEFAULT_MAX_PLAYER_AGE_MINUTES = 60;
+const DEFAULT_MIN_SYNC_COVERAGE_RATIO = 0.8;
+let catalogReadyPromise = null;
+
+async function ensurePlayerIndexes() {
+  const existingIndexes = await Player.collection.indexes();
+  for (const index of existingIndexes) {
+    const isSingleFieldMlbPlayerIdIndex =
+      index.name !== '_id_' &&
+      index.key &&
+      Object.keys(index.key).length === 1 &&
+      index.key.mlbPlayerId === 1;
+
+    if (isSingleFieldMlbPlayerIdIndex) {
+      await Player.collection.dropIndex(index.name);
+    }
+  }
+
+  await Player.collection.createIndex(
+    { mlbPlayerId: 1 },
+    {
+      unique: true,
+      partialFilterExpression: {
+        mlbPlayerId: { $type: 'number' },
+        isCustom: false,
+      },
+      name: 'mlbPlayerId_1',
+    }
+  );
+}
+
+async function removeDuplicatePlayers() {
+  const duplicates = await Player.aggregate([
+    {
+      $match: {
+        isCustom: { $ne: true },
+        mlbPlayerId: { $type: 'number' },
+      },
+    },
+    {
+      $sort: {
+        lastSyncedAt: -1,
+        updatedAt: -1,
+        createdAt: -1,
+        _id: 1,
+      },
+    },
+    {
+      $group: {
+        _id: '$mlbPlayerId',
+        ids: { $push: '$_id' },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $match: {
+        count: { $gt: 1 },
+      },
+    },
+  ]);
+
+  let deletedCount = 0;
+
+  for (const duplicate of duplicates) {
+    const staleIds = duplicate.ids.slice(1);
+    if (!staleIds.length) continue;
+    const result = await Player.deleteMany({ _id: { $in: staleIds } });
+    deletedCount += result.deletedCount || 0;
+  }
+
+  return deletedCount;
+}
 
 function requireEnv(key) {
   const value = process.env[key];
@@ -33,6 +104,20 @@ function getMaxPlayerAgeMs() {
   }
 
   return Math.floor(minutes * 60 * 1000);
+}
+
+function getMinSyncCoverageRatio() {
+  const raw = process.env.PLAYER_SYNC_MIN_COVERAGE_RATIO;
+  if (!raw || !String(raw).trim()) {
+    return DEFAULT_MIN_SYNC_COVERAGE_RATIO;
+  }
+
+  const ratio = Number(raw);
+  if (!Number.isFinite(ratio) || ratio <= 0 || ratio > 1) {
+    throw new Error('PLAYER_SYNC_MIN_COVERAGE_RATIO must be a number between 0 and 1');
+  }
+
+  return ratio;
 }
 
 async function ensureSeedLicense() {
@@ -108,6 +193,12 @@ async function softReseedPlayers() {
   const result = await loadMlbSeedPlayers();
   const seenIds = [];
 
+  const removedDuplicatesBeforeSync = await removeDuplicatePlayers();
+  const previousActiveCount = await Player.countDocuments({
+    isCustom: { $ne: true },
+    isActiveRoster: true,
+  });
+
   for (const player of result.players) {
     seenIds.push(player.mlbPlayerId);
     await Player.updateOne(
@@ -123,15 +214,19 @@ async function softReseedPlayers() {
     );
   }
 
-  const inactiveResult = await Player.updateMany(
-    { mlbPlayerId: { $nin: seenIds } },
-    {
-      $set: {
-        isActiveRoster: false,
-        lastSyncedAt: new Date(),
-      },
-    }
-  );
+  const minCoverageRatio = getMinSyncCoverageRatio();
+  const currentSyncCount = result.players.length;
+  const isSuspiciousCoverage =
+    previousActiveCount > 0 && currentSyncCount / previousActiveCount < minCoverageRatio;
+
+  const deletedStalePlayersResult = isSuspiciousCoverage
+    ? { deletedCount: 0 }
+    : await Player.deleteMany({
+        isCustom: { $ne: true },
+        mlbPlayerId: { $nin: seenIds },
+      });
+  const removedDuplicatesAfterSync = await removeDuplicatePlayers();
+  await ensurePlayerIndexes();
 
   const totalCount = await Player.countDocuments();
 
@@ -139,7 +234,10 @@ async function softReseedPlayers() {
     inserted: result.players.length,
     count: totalCount,
     skipped: false,
-    markedInactive: inactiveResult.modifiedCount,
+    deletedStalePlayers: deletedStalePlayersResult.deletedCount || 0,
+    removedDuplicatePlayers: removedDuplicatesBeforeSync + removedDuplicatesAfterSync,
+    staleDeletionSkipped: isSuspiciousCoverage,
+    syncCoverage: previousActiveCount > 0 ? Number((currentSyncCount / previousActiveCount).toFixed(3)) : 1,
     mlbSeed: {
       enabled: true,
       season: result.season,
@@ -182,4 +280,27 @@ async function ensureSeedData({ force = false } = {}) {
   };
 }
 
-module.exports = { ensureSeedData };
+async function ensurePlayerCatalogReady() {
+  const existingCount = await Player.countDocuments();
+  if (existingCount > 0) {
+    return { seeded: false, count: existingCount };
+  }
+
+  if (!catalogReadyPromise) {
+    catalogReadyPromise = ensureSeedData({ force: true }).finally(() => {
+      catalogReadyPromise = null;
+    });
+  }
+
+  const result = await catalogReadyPromise;
+  return {
+    seeded: true,
+    count: result.count,
+    result,
+  };
+}
+
+module.exports = {
+  ensurePlayerCatalogReady,
+  ensureSeedData,
+};

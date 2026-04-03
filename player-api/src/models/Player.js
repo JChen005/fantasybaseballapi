@@ -63,6 +63,7 @@ playerSchema.index(
     unique: true,
     partialFilterExpression: {
       mlbPlayerId: { $type: 'number' },
+      isCustom: false,
     },
   }
 );
