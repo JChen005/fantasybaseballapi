@@ -1,49 +1,87 @@
-# Player API (`@draftkit/player-api`)
+# Fantasy Baseball API
 
-Separate licensed Player API service for DraftKit.
+This repo houses the standalone DraftKit Player API service in:
 
-This repo serves the player catalog, valuation engine, depth-chart data, transactions, and API docs from the `player-api` app. It is designed to run independently from `fantasybaseballwebapp`.
+- `player-api/`
 
-## Current Responsibilities
+It is a separate backend from the webapp. The webapp owns league state and persisted draft state. This repo owns player data, valuation responses, depth charts, licensing, and admin refresh flows.
 
-- licensed player catalog access
-- stored `baseValue` generation during seed/sync
-- valuation endpoint returning `baseValue`, `marketValue`, and `adjustedValue`
-- MLB depth-chart ingestion and team depth-chart endpoint
-- transaction streaming and admin refresh hooks
+## Service Boundary
 
-The Player API does not persist live draft room state. Draft state lives in the webapp backend and is sent to this service per valuation request.
+This repo is responsible for:
 
-## Required Environment
+- player catalog storage
+- player search and detail endpoints
+- valuation snapshots (`baseValue`, `marketValue`, `adjustedValue`)
+- MLB roster and depth-chart ingestion
+- transaction streaming
+- license enforcement for API consumers
 
-- `MONGODB_URI`
-- `ADMIN_SECRET`
-- `PLAYER_API_LICENSE_KEY`
-- `PLAYER_API_LICENSE_CONSUMER` optional, defaults to `DraftKit Web App`
-- `AUTO_SEED` optional, defaults to `true`
-- `PORT` optional, defaults to `5050`
+This repo does not own:
 
-## Local Run
+- league CRUD
+- keeper board state
+- persisted draft room state
+- draft slot assignment
+- webapp-specific roster-fit rules
+
+Those concerns live in the DraftKit webapp backend.
+
+## Repo Layout
+
+```text
+player-api/   Express + MongoDB Player API service
+```
+
+## Local Development
+
+### Install
 
 ```bash
-cd player-api
+cd /player-api
 npm install
+```
+
+### Run locally
+
+```bash
+cd /player-api
 npm run dev
 ```
 
-To reseed the player catalog:
+Default local port:
+
+- `5050`
+
+### Seed or refresh player data
 
 ```bash
-cd player-api
+cd /player-api
 npm run seed
 ```
 
-## Public Endpoints
+## Environment
+
+The exact environment depends on deployment, but the main service expects:
+
+- `MONGODB_URI`
+- `PLAYER_API_ADMIN_SECRET`
+
+Common optional flags:
+
+- `AUTO_SEED`
+- `SEED_SEASON`
+- `PLAYER_SYNC_MAX_AGE_MS`
+- `PLAYER_SYNC_MIN_COVERAGE_RATIO`
+- `PORT`
+
+## Core Endpoints
+
+### Public
 
 - `GET /v1/health`
-- `GET /v1/docs/openapi`
 
-## Licensed Endpoints
+### Licensed
 
 - `GET /v1/license/status`
 - `GET /v1/players`
@@ -55,30 +93,40 @@ npm run seed
 - `GET /v1/teams/:teamId/depth-chart`
 - `GET /v1/stream/transactions`
 
-## Admin Endpoints
+### Admin
 
 - `POST /v1/admin/data-refresh`
 - `POST /v1/admin/mock-transaction`
 
 ## Valuation Model
 
-The current valuation output has three layers:
+Current valuation output has three layers:
 
-- `baseValue`: internal strength score built from stats plus depth context
-- `marketValue`: room-style auction price estimate
-- `adjustedValue`: team-context price estimate using remaining budget and open-slot fit
+- `baseValue`: stored player strength score built from synced stats and depth context
+- `marketValue`: market-style auction value derived from the player pool
+- `adjustedValue`: league-context value derived from market value plus draft context
 
-Request-time draft context comes from the webapp and includes:
+Request-time draft context is provided by the webapp and includes:
 
 - `league`
 - `filters`
 - `draftState.excludedPlayers`
 - `draftState.filledSlots`
 
-The service does not store draft state internally.
+The Player API does not persist draft state internally.
 
-## Notes
+## Main Files
 
-- Player list/search/detail routes use lightweight in-memory caching to reduce repeated reads on cheaper hosting plans.
-- Admin mutations invalidate that cache so refreshes and mock transactions stay visible.
-- Player reseed hard-cleans stale non-custom rows, removes duplicate `mlbPlayerId` rows, and enforces one canonical unique `mlbPlayerId` index for synced players.
+- `player-api/src/app.js`
+- `player-api/src/server.js`
+- `player-api/api/index.js`
+- `player-api/src/services/playerService.js`
+- `player-api/src/services/mlbStatsService.js`
+- `player-api/src/services/seedService.js`
+- `player-api/src/routes/playerRoutes.js`
+- `player-api/src/routes/adminRoutes.js`
+- `player-api/src/validators/requestValidators.js`
+
+## Related Repo
+
+The corresponding web application lives separately in the DraftKit webapp repo and calls this service over HTTP.
