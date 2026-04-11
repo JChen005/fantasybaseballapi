@@ -459,9 +459,6 @@ async function getValuationSnapshot({
         marketValue,
         replacementLevel: auctionDetails.replacementLevel,
         rosterable: auctionDetails.rosterable,
-        fillsNeed: teamFit.fillsNeed,
-        eligibleRosterSlots: teamFit.eligibleSlots,
-        teamFitMultiplier: teamFit.teamFitMultiplier,
         maxBid,
         adjustedValue,
       };
