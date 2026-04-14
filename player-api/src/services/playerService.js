@@ -3,6 +3,31 @@ const Player = require('../models/Player');
 const { AppError } = require('../utils/appError');
 const { getTeamDepthChart: fetchTeamDepthChart } = require('./mlbStatsService');
 
+// Default share of rosterable slots treated as dollarable in the auction pool.
+const DEFAULT_DOLLARABLE_POOL_SHARE = 0.45;
+// Prevent the market pool from getting too narrow even if the auction pool is tighter.
+const MIN_MARKET_POOL_SHARE = 0.6;
+// Sets the rough top-end target price as a share of total auction budget.
+const MARKET_ELITE_BUDGET_SHARE = 0.2;
+// Keep reserve-tier players cheap without collapsing the whole tail to exactly $1.
+const BELOW_REPLACEMENT_VALUE_FLOOR = 1;
+const BELOW_REPLACEMENT_VALUE_CEILING = 9;
+// Make the replacement line visible by keeping rosterable players in double digits.
+const ABOVE_REPLACEMENT_VALUE_FLOOR = 10;
+// Scarcity stays modest: this is the lowest allowed positional multiplier.
+const ROLE_SCARCITY_MIN_MULTIPLIER = 0.95;
+// Cap positional scarcity so thin roles do not dominate the whole pricing model.
+const ROLE_SCARCITY_MAX_MULTIPLIER = 1.12;
+// Controls how strongly demand/supply ratio moves the scarcity multiplier.
+const ROLE_SCARCITY_WEIGHT = 0.35;
+// Count a role as "usable" for scarcity only if it clears this share of elite value.
+const ROLE_SCARCITY_USABLE_VALUE_SHARE = 0.3;
+// Clamp the final post-scarcity/post-team-fit multiplier to avoid runaway inflation.
+const COMBINED_FIT_MIN_MULTIPLIER = 0.78;
+const COMBINED_FIT_MAX_MULTIPLIER = 1.22;
+// If both scarcity and team fit point the same direction, soften the team-fit bump.
+const TEAM_FIT_OVERLAP_DAMPING = 0.65;
+
 function withLeagueFilter(leagueType) {
   if (!leagueType) return {};
   return { mlbLeague: leagueType };
@@ -80,31 +105,35 @@ function getOpenSlots(rosterSlots = {}, filledSlots = {}) {
 
 function normalizePositionToken(position) {
   const normalized = String(position || '').trim().toUpperCase();
-  if (normalized === '1B' || normalized === 'B1') return 'B1';
-  if (normalized === '2B' || normalized === 'B2') return 'B2';
-  if (normalized === '3B' || normalized === 'B3') return 'B3';
+  if (normalized === '1B' || normalized === 'B1') return '1B';
+  if (normalized === '2B' || normalized === 'B2') return '2B';
+  if (normalized === '3B' || normalized === 'B3') return '3B';
   if (normalized === 'SP' || normalized === 'RP' || normalized === 'P') return 'P';
   return normalized;
 }
 
 function getEligibleRosterSlots(player) {
+  if (Array.isArray(player?.eligibleRosterSlots)) {
+    return player.eligibleRosterSlots;
+  }
+
   const rawPositions = Array.isArray(player.positions) ? player.positions : [];
   const normalizedPositions = new Set(
     rawPositions
       .map(normalizePositionToken)
-      .filter((position) => ['C', 'B1', 'B2', 'B3', 'SS', 'OF', 'P', 'UTIL', 'TWOWAYPLAYER'].includes(position))
+      .filter((position) => ['C', '1B', '2B', '3B', 'SS', 'OF', 'P', 'UTIL', 'TWOWAYPLAYER'].includes(position))
   );
 
   const eligibleSlots = new Set();
   if (normalizedPositions.has('C')) eligibleSlots.add('C');
-  if (normalizedPositions.has('B1')) eligibleSlots.add('B1');
-  if (normalizedPositions.has('B2')) eligibleSlots.add('B2');
-  if (normalizedPositions.has('B3')) eligibleSlots.add('B3');
+  if (normalizedPositions.has('1B')) eligibleSlots.add('1B');
+  if (normalizedPositions.has('2B')) eligibleSlots.add('2B');
+  if (normalizedPositions.has('3B')) eligibleSlots.add('3B');
   if (normalizedPositions.has('SS')) eligibleSlots.add('SS');
   if (normalizedPositions.has('OF')) eligibleSlots.add('OF');
   if (normalizedPositions.has('P') || normalizedPositions.has('TWOWAYPLAYER')) eligibleSlots.add('P');
 
-  const isHitterEligible = [...normalizedPositions].some((position) => ['C', 'B1', 'B2', 'B3', 'SS', 'OF'].includes(position));
+  const isHitterEligible = [...normalizedPositions].some((position) => ['C', '1B', '2B', '3B', 'SS', 'OF'].includes(position));
   const isPitcherOnly = eligibleSlots.has('P') && !isHitterEligible;
   if (!isPitcherOnly && (isHitterEligible || normalizedPositions.has('TWOWAYPLAYER') || normalizedPositions.has('UTIL'))) {
     eligibleSlots.add('UTIL');
@@ -132,46 +161,112 @@ function getTeamFit(player, openSlots, hasFilledSlots) {
   };
 }
 
+function buildRoleScarcityBySlot(players, league, usableValueThreshold) {
+  const rosterSlots = league?.rosterSlots || {};
+  const teamCount = Math.max(1, Number(league?.teamCount) || 1);
+  const relevantSlots = Object.entries(rosterSlots)
+    .filter(([slot, count]) => slot !== 'BN' && slot !== 'UTIL' && Number(count) > 0)
+    .map(([slot]) => slot);
+  const minimumBaseValue = Math.max(0, Number(usableValueThreshold) || 0);
+
+  return Object.fromEntries(
+    relevantSlots.map((slot) => {
+      const demand = teamCount * Math.max(0, Number(rosterSlots[slot]) || 0);
+      const supply = Math.max(
+        1,
+        players
+          .filter((player) =>
+            Number(player?.baseValue || 0) >= minimumBaseValue
+            && getEligibleRosterSlots(player).includes(slot)
+          )
+          .length
+      );
+      const scarcityRatio = demand / supply;
+      const rawMultiplier = 1 + ((scarcityRatio - 1) * ROLE_SCARCITY_WEIGHT);
+      const multiplier = Math.min(
+        ROLE_SCARCITY_MAX_MULTIPLIER,
+        Math.max(ROLE_SCARCITY_MIN_MULTIPLIER, Number(rawMultiplier.toFixed(3)))
+      );
+
+      return [slot, multiplier];
+    })
+  );
+}
+
+function getRoleScarcityDetails(player, roleScarcityBySlot = {}) {
+  const eligibleSlots = getEligibleRosterSlots(player).filter((slot) => slot in roleScarcityBySlot);
+
+  if (!eligibleSlots.length) {
+    return 1;
+  }
+
+  let bestSlot = eligibleSlots[0];
+  for (const slot of eligibleSlots.slice(1)) {
+    if ((roleScarcityBySlot[slot] || 1) > (roleScarcityBySlot[bestSlot] || 1)) {
+      bestSlot = slot;
+    }
+  }
+
+  return roleScarcityBySlot[bestSlot] || 1;
+}
+
+function combineFitMultipliers({ roleScarcityMultiplier, teamFitMultiplier }) {
+  const scarcityPremium = (Number(roleScarcityMultiplier) || 1) - 1;
+  const teamFitPremium = (Number(teamFitMultiplier) || 1) - 1;
+  const dampedTeamFitPremium =
+    scarcityPremium > 0 && teamFitPremium > 0
+      ? teamFitPremium * TEAM_FIT_OVERLAP_DAMPING
+      : teamFitPremium;
+  const combined = 1 + scarcityPremium + dampedTeamFitPremium;
+
+  return Math.min(
+    COMBINED_FIT_MAX_MULTIPLIER,
+    Math.max(COMBINED_FIT_MIN_MULTIPLIER, Number(combined.toFixed(3)))
+  );
+}
+
 function getReplacementLevel(players, slotCount) {
   if (!slotCount || !players.length) return 0;
   const cappedIndex = Math.min(players.length, slotCount) - 1;
   return Math.max(0, Number(players[cappedIndex]?.baseValue) || 0);
 }
 
-function buildAuctionPool(players, league) {
-  const rosterShape = getRosterShape(league.rosterSlots);
-  const dollarablePoolShare = Number.isFinite(Number(league.dollarablePoolShare))
-    ? Number(league.dollarablePoolShare)
-    : 0.3;
-  const poolSize = Math.max(1, Math.round(rosterShape.starterSlots * league.teamCount * dollarablePoolShare));
+function buildRankedPool(players, poolSize) {
   const sortedPlayers = [...players].sort((left, right) => right.baseValue - left.baseValue || left.name.localeCompare(right.name));
   const replacementLevel = getReplacementLevel(sortedPlayers, poolSize);
   const rosterablePlayers = new Set(sortedPlayers.slice(0, poolSize).map((player) => String(player._id)));
 
   return {
-    rosterShape,
     poolSize,
     replacementLevel,
     rosterablePlayers,
   };
 }
 
+function buildAuctionPool(players, league) {
+  const rosterShape = getRosterShape(league.rosterSlots);
+  const dollarablePoolShare = Number.isFinite(Number(league.dollarablePoolShare))
+    ? Number(league.dollarablePoolShare)
+    : DEFAULT_DOLLARABLE_POOL_SHARE;
+  const poolSize = Math.max(1, Math.round(rosterShape.starterSlots * league.teamCount * dollarablePoolShare));
+
+  return {
+    rosterShape,
+    ...buildRankedPool(players, poolSize),
+  };
+}
+
 function buildMarketPool(players, league) {
   const rosterShape = getRosterShape(league.rosterSlots);
   const marketPoolShare = Math.max(
-    Number.isFinite(Number(league.dollarablePoolShare)) ? Number(league.dollarablePoolShare) : 0.3,
-    0.5
+    Number.isFinite(Number(league.dollarablePoolShare))
+      ? Number(league.dollarablePoolShare)
+      : DEFAULT_DOLLARABLE_POOL_SHARE,
+    MIN_MARKET_POOL_SHARE
   );
   const poolSize = Math.max(1, Math.round(rosterShape.starterSlots * league.teamCount * marketPoolShare));
-  const sortedPlayers = [...players].sort((left, right) => right.baseValue - left.baseValue || left.name.localeCompare(right.name));
-  const replacementLevel = getReplacementLevel(sortedPlayers, poolSize);
-  const rosterablePlayers = new Set(sortedPlayers.slice(0, poolSize).map((player) => String(player._id)));
 
-  return {
-    poolSize,
-    replacementLevel,
-    rosterablePlayers,
-  };
+  return buildRankedPool(players, poolSize);
 }
 
 function computeAuctionBaseValue(player, auctionPool) {
@@ -290,7 +385,35 @@ function toMarketWeight(auctionBaseValue) {
 function getMarketEliteValueTarget(budget) {
   const normalizedBudget = Number(budget) || 0;
   if (normalizedBudget <= 0) return 0;
-  return Math.max(10, Math.round(normalizedBudget * 0.17));
+  return Math.max(10, Math.round(normalizedBudget * MARKET_ELITE_BUDGET_SHARE));
+}
+
+function computeBelowReplacementValue({
+  player,
+  marketReplacementLevel,
+  teamFitMultiplier,
+  maxBid,
+}) {
+  const safeReplacementLevel = Number(marketReplacementLevel) || 0;
+  const safeBaseValue = Math.max(0, Number(player?.baseValue) || 0);
+  const maxTailSpread = BELOW_REPLACEMENT_VALUE_CEILING - BELOW_REPLACEMENT_VALUE_FLOOR;
+
+  if (maxBid <= 0) {
+    return 0;
+  }
+
+  if (safeReplacementLevel <= 0 || maxTailSpread <= 0) {
+    return Math.min(maxBid, BELOW_REPLACEMENT_VALUE_FLOOR);
+  }
+
+  const replacementRatio = Math.min(1, safeBaseValue / safeReplacementLevel);
+  const rawTailValue = BELOW_REPLACEMENT_VALUE_FLOOR + (replacementRatio * maxTailSpread * teamFitMultiplier);
+
+  return Math.min(
+    BELOW_REPLACEMENT_VALUE_CEILING,
+    maxBid,
+    Math.max(BELOW_REPLACEMENT_VALUE_FLOOR, Math.round(rawTailValue))
+  );
 }
 
 function getBudgetAdjustmentFactor({ remainingBudget, remainingRosterSpots, budget, totalSlots }) {
@@ -350,17 +473,25 @@ async function getValuationSnapshot({
       })
       .lean(),
   ]);
+  const poolPlayersWithEligibleSlots = poolPlayers.map((player) => ({
+    ...player,
+    eligibleRosterSlots: getEligibleRosterSlots(player),
+  }));
+  const playersWithEligibleSlots = players.map((player) => ({
+    ...player,
+    eligibleRosterSlots: getEligibleRosterSlots(player),
+  }));
 
-  const auctionPool = buildAuctionPool(poolPlayers, league);
-  const marketPool = buildMarketPool(poolPlayers, league);
+  const auctionPool = buildAuctionPool(poolPlayersWithEligibleSlots, league);
+  const marketPool = buildMarketPool(poolPlayersWithEligibleSlots, league);
   const auctionDetailsById = new Map(
-    poolPlayers.map((player) => {
+    poolPlayersWithEligibleSlots.map((player) => {
       const details = computeAuctionBaseValue(player, auctionPool);
       return [String(player._id), details];
     })
   );
   const marketDetailsById = new Map(
-    poolPlayers.map((player) => {
+    poolPlayersWithEligibleSlots.map((player) => {
       const playerId = String(player._id);
       const rosterable = marketPool.rosterablePlayers.has(playerId);
       const marketAuctionBaseValue = rosterable
@@ -400,6 +531,12 @@ async function getValuationSnapshot({
   const openSlots = getOpenSlots(league.rosterSlots, draftState.filledSlots);
   const hasFilledSlots = Object.keys(draftState.filledSlots).length > 0;
   const marketEliteValueTarget = getMarketEliteValueTarget(league.budget);
+  const roleScarcityUsableValueThreshold = marketEliteValueTarget * ROLE_SCARCITY_USABLE_VALUE_SHARE;
+  const roleScarcityBySlot = buildRoleScarcityBySlot(
+    poolPlayersWithEligibleSlots,
+    league,
+    roleScarcityUsableValueThreshold
+  );
 
   return {
     valuation: {
@@ -407,57 +544,60 @@ async function getValuationSnapshot({
       remainingRosterSpots,
       surplusBudget,
       maxBid,
-      maxRemainingMarketAuctionWeight,
-      replacementLevel: Number(auctionPool.replacementLevel.toFixed(2)),
-      rosterablePoolSize: auctionPool.poolSize,
       startersPerTeam: rosterShape.starterSlots,
       benchPerTeam: rosterShape.benchSlots,
       marketEliteValueTarget,
       budgetAdjustmentFactor,
-      openSlots,
     },
-    players: players.map((player) => {
+    players: playersWithEligibleSlots.map((player) => {
       const auctionDetails = auctionDetailsById.get(String(player._id)) || {
         auctionBaseValue: 0,
         rosterable: false,
-        replacementLevel: 0,
       };
 
       let adjustedValue = 0;
       let marketValue = 0;
       const teamFit = getTeamFit(player, openSlots, hasFilledSlots);
+      const roleScarcityMultiplier = getRoleScarcityDetails(player, roleScarcityBySlot);
+      const combinedFitMultiplier = combineFitMultipliers({
+        roleScarcityMultiplier,
+        teamFitMultiplier: teamFit.teamFitMultiplier,
+      });
       if (auctionDetails.rosterable) {
         const marketDetails = marketDetailsById.get(String(player._id)) || {
           rosterable: false,
           marketAuctionBaseValue: 0,
         };
         if (marketDetails.rosterable) {
-          marketValue = 1;
+          marketValue = ABOVE_REPLACEMENT_VALUE_FLOOR;
           const marketWeight = toMarketWeight(marketDetails.marketAuctionBaseValue);
           if (marketWeight > 0 && maxRemainingMarketAuctionWeight > 0 && marketEliteValueTarget > 0) {
             marketValue = Math.max(
-              1,
+              ABOVE_REPLACEMENT_VALUE_FLOOR,
               Math.round((marketWeight / maxRemainingMarketAuctionWeight) * marketEliteValueTarget)
             );
           }
         }
         if (marketValue > 0 && budgetAdjustmentFactor > 0) {
-          adjustedValue = Math.max(1, Math.round(marketValue * budgetAdjustmentFactor * teamFit.teamFitMultiplier));
-        } else if (auctionDetails.auctionBaseValue > 0) {
-          adjustedValue = 1;
+          adjustedValue = Math.max(
+            ABOVE_REPLACEMENT_VALUE_FLOOR,
+            Math.round(marketValue * budgetAdjustmentFactor * combinedFitMultiplier)
+          );
         }
         adjustedValue = Math.min(adjustedValue, maxBid);
       } else {
-        // Below-replacement players still show as $1 endgame options in the auction UI.
-        marketValue = 1;
-        adjustedValue = Math.min(1, maxBid);
+        marketValue = computeBelowReplacementValue({
+          player,
+          marketReplacementLevel: marketPool.replacementLevel,
+          teamFitMultiplier: combinedFitMultiplier,
+          maxBid,
+        });
+        adjustedValue = marketValue;
       }
 
       return {
         ...player,
-        auctionBaseValue: auctionDetails.auctionBaseValue,
         marketValue,
-        replacementLevel: auctionDetails.replacementLevel,
         rosterable: auctionDetails.rosterable,
         maxBid,
         adjustedValue,

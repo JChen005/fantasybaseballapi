@@ -22,10 +22,6 @@ function toNumber(value, digits = null) {
   return digits == null ? numeric : Number(numeric.toFixed(digits));
 }
 
-function emptyStats() {
-  return { hr: 0, rbi: 0, sb: 0, avg: 0, w: 0, k: 0, era: 0, whip: 0 };
-}
-
 function buildTransaction(player, season) {
   return [{
     date: `${season}-01-01`,
@@ -222,10 +218,10 @@ function computeBaseValue(stats, { depthRank, primarySlot, positions = [] } = {}
     stats.sb * 4 +
     stats.avg * 420;
   const pitcherValue =
-    stats.w * 7 +
-    stats.k * 1.6 -
-    stats.era * 30 -
-    stats.whip * 45;
+    stats.w * 14 +
+    stats.k * 3.1 -
+    stats.era * 24 -
+    stats.whip * 36;
   const weightedRawValue = Math.max(1, hitterValue + pitcherValue) * getDepthContextMultiplier({ depthRank, primarySlot, positions });
   const scaledBaseValue = Math.pow(weightedRawValue / 3, 1.7);
 
