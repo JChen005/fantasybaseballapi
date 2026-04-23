@@ -1,7 +1,12 @@
 const mongoose = require('mongoose');
 const Player = require('../models/Player');
 const { AppError } = require('../utils/appError');
-const { getTeamDepthChart: fetchTeamDepthChart } = require('./mlbStatsService');
+const {
+  getTeamDepthChart: fetchTeamDepthChart,
+  upsertPlayerByMlbId,
+  upsertPlayersByMlbSearch,
+} = require('./mlbStatsService');
+const { invalidateCatalogCache } = require('./catalogCache');
 
 // Default share of rosterable slots treated as dollarable in the auction pool.
 const DEFAULT_DOLLARABLE_POOL_SHARE = 0.45;
@@ -34,7 +39,7 @@ function withLeagueFilter(leagueType) {
 }
 
 function withActiveFilter(includeInactive) {
-  return includeInactive ? {} : { isActiveRoster: true };
+  return includeInactive ? {} : { isMlbRelevant: true };
 }
 
 function buildExcludedPlayerFilter(excludedPlayers = []) {
@@ -308,10 +313,25 @@ async function searchPlayers({ escapedQuery, includeDrafted, includeInactive = f
     ...withSearchFilter(escapedQuery),
   };
 
-  return Player.find(query)
+  let players = await Player.find(query)
     .sort({ baseValue: -1, canonicalName: 1, name: 1 })
     .limit(limit)
     .lean();
+
+  if (!players.length && escapedQuery) {
+    const searchText = escapedQuery.replace(/\\(.)/g, '$1');
+    const upsertedPlayers = await upsertPlayersByMlbSearch({ query: searchText });
+    if (upsertedPlayers.length) {
+      invalidateCatalogCache('search:');
+      invalidateCatalogCache('players:');
+      players = await Player.find(query)
+        .sort({ baseValue: -1, canonicalName: 1, name: 1 })
+        .limit(limit)
+        .lean();
+    }
+  }
+
+  return players;
 }
 
 function buildPlayerLookup(playerId) {
@@ -325,7 +345,16 @@ function buildPlayerLookup(playerId) {
 }
 
 async function getPlayerById(playerId) {
-  const player = await Player.findOne(buildPlayerLookup(playerId)).lean();
+  let player = await Player.findOne(buildPlayerLookup(playerId)).lean();
+  if (!player && typeof playerId === 'number') {
+    const upserted = await upsertPlayerByMlbId(playerId);
+    if (upserted) {
+      invalidateCatalogCache(`player:${playerId}`);
+      invalidateCatalogCache('players:');
+      invalidateCatalogCache('search:');
+      player = await Player.findOne(buildPlayerLookup(playerId)).lean();
+    }
+  }
   if (!player) {
     throw new AppError('Player not found', 404);
   }
@@ -434,6 +463,110 @@ function getBudgetAdjustmentFactor({ remainingBudget, remainingRosterSpots, budg
   return Math.min(1.25, Math.max(0.65, Number(rawFactor.toFixed(3))));
 }
 
+function buildMarketDetailsById(players, marketPool) {
+  return new Map(
+    players.map((player) => {
+      const playerId = String(player._id);
+      const rosterable = marketPool.rosterablePlayers.has(playerId);
+      const marketAuctionBaseValue = rosterable
+        ? Math.max(0, Number((Number(player.baseValue || 0) - marketPool.replacementLevel).toFixed(2)))
+        : 0;
+
+      return [playerId, {
+        rosterable,
+        marketAuctionBaseValue,
+      }];
+    })
+  );
+}
+
+function computeRosterBudgetState({ draftState, league, rosterShape }) {
+  const budgetEntries = draftState.excludedPlayers.filter((entry) => entry.countsAgainstBudget);
+  const spentBudget = budgetEntries.reduce((sum, entry) => sum + entry.cost, 0);
+  const remainingBudget = Math.max(0, league.budget - spentBudget);
+  const filledRosterSpots = budgetEntries.length;
+  const remainingRosterSpots = Math.max(0, rosterShape.totalSlots - filledRosterSpots);
+  const surplusBudget = Math.max(0, remainingBudget - remainingRosterSpots);
+  const maxBid = remainingRosterSpots > 0 ? Math.max(0, remainingBudget - (remainingRosterSpots - 1)) : 0;
+
+  return {
+    remainingBudget,
+    remainingRosterSpots,
+    surplusBudget,
+    maxBid,
+  };
+}
+
+function buildValuationRow({
+  player,
+  auctionDetailsById,
+  marketDetailsById,
+  marketPool,
+  maxRemainingMarketAuctionWeight,
+  marketEliteValueTarget,
+  budgetAdjustmentFactor,
+  maxBid,
+  openSlots,
+  hasFilledSlots,
+  roleScarcityBySlot,
+}) {
+  const playerId = String(player._id);
+  const auctionDetails = auctionDetailsById.get(playerId) || {
+    auctionBaseValue: 0,
+    rosterable: false,
+  };
+  const teamFit = getTeamFit(player, openSlots, hasFilledSlots);
+  const roleScarcityMultiplier = getRoleScarcityDetails(player, roleScarcityBySlot);
+  const combinedFitMultiplier = combineFitMultipliers({
+    roleScarcityMultiplier,
+    teamFitMultiplier: teamFit.teamFitMultiplier,
+  });
+  let adjustedValue = 0;
+  let marketValue = 0;
+
+  if (auctionDetails.rosterable) {
+    const marketDetails = marketDetailsById.get(playerId) || {
+      rosterable: false,
+      marketAuctionBaseValue: 0,
+    };
+    if (marketDetails.rosterable) {
+      marketValue = ABOVE_REPLACEMENT_VALUE_FLOOR;
+      const marketWeight = toMarketWeight(marketDetails.marketAuctionBaseValue);
+      if (marketWeight > 0 && maxRemainingMarketAuctionWeight > 0 && marketEliteValueTarget > 0) {
+        marketValue = Math.max(
+          ABOVE_REPLACEMENT_VALUE_FLOOR,
+          Math.round((marketWeight / maxRemainingMarketAuctionWeight) * marketEliteValueTarget)
+        );
+      }
+    }
+    if (marketValue > 0 && budgetAdjustmentFactor > 0) {
+      adjustedValue = Math.max(
+        ABOVE_REPLACEMENT_VALUE_FLOOR,
+        Math.round(marketValue * budgetAdjustmentFactor * combinedFitMultiplier)
+      );
+    }
+    adjustedValue = Math.min(adjustedValue, maxBid);
+  } else {
+    marketValue = computeBelowReplacementValue({
+      player,
+      marketReplacementLevel: marketPool.replacementLevel,
+      teamFitMultiplier: combinedFitMultiplier,
+      maxBid,
+    });
+    adjustedValue = marketValue;
+  }
+
+  return {
+    ...player,
+    marketValue,
+    rosterable: auctionDetails.rosterable,
+    fillsNeed: teamFit.fillsNeed,
+    eligibleSlots: teamFit.eligibleSlots,
+    maxBid,
+    adjustedValue,
+  };
+}
+
 async function getValuationSnapshot({
   league,
   filters,
@@ -490,20 +623,7 @@ async function getValuationSnapshot({
       return [String(player._id), details];
     })
   );
-  const marketDetailsById = new Map(
-    poolPlayersWithEligibleSlots.map((player) => {
-      const playerId = String(player._id);
-      const rosterable = marketPool.rosterablePlayers.has(playerId);
-      const marketAuctionBaseValue = rosterable
-        ? Math.max(0, Number((Number(player.baseValue || 0) - marketPool.replacementLevel).toFixed(2)))
-        : 0;
-
-      return [playerId, {
-        rosterable,
-        marketAuctionBaseValue,
-      }];
-    })
-  );
+  const marketDetailsById = buildMarketDetailsById(poolPlayersWithEligibleSlots, marketPool);
 
   const maxRemainingMarketAuctionWeight = Number(
     poolPlayers
@@ -513,18 +633,11 @@ async function getValuationSnapshot({
       }, 0)
       .toFixed(2)
   );
-  const spentBudget = draftState.excludedPlayers
-    .filter((entry) => entry.countsAgainstBudget)
-    .reduce((sum, entry) => sum + entry.cost, 0);
-  const remainingBudget = Math.max(0, league.budget - spentBudget);
   const rosterShape = auctionPool.rosterShape;
-  const filledRosterSpots = draftState.excludedPlayers.filter((entry) => entry.countsAgainstBudget).length;
-  const remainingRosterSpots = Math.max(0, rosterShape.totalSlots - filledRosterSpots);
-  const surplusBudget = Math.max(0, remainingBudget - remainingRosterSpots);
-  const maxBid = remainingRosterSpots > 0 ? Math.max(0, remainingBudget - (remainingRosterSpots - 1)) : 0;
+  const rosterBudgetState = computeRosterBudgetState({ draftState, league, rosterShape });
   const budgetAdjustmentFactor = getBudgetAdjustmentFactor({
-    remainingBudget,
-    remainingRosterSpots,
+    remainingBudget: rosterBudgetState.remainingBudget,
+    remainingRosterSpots: rosterBudgetState.remainingRosterSpots,
     budget: league.budget,
     totalSlots: rosterShape.totalSlots,
   });
@@ -540,69 +653,28 @@ async function getValuationSnapshot({
 
   return {
     valuation: {
-      remainingBudget,
-      remainingRosterSpots,
-      surplusBudget,
-      maxBid,
+      remainingBudget: rosterBudgetState.remainingBudget,
+      remainingRosterSpots: rosterBudgetState.remainingRosterSpots,
+      surplusBudget: rosterBudgetState.surplusBudget,
+      maxBid: rosterBudgetState.maxBid,
       startersPerTeam: rosterShape.starterSlots,
       benchPerTeam: rosterShape.benchSlots,
       marketEliteValueTarget,
       budgetAdjustmentFactor,
     },
-    players: playersWithEligibleSlots.map((player) => {
-      const auctionDetails = auctionDetailsById.get(String(player._id)) || {
-        auctionBaseValue: 0,
-        rosterable: false,
-      };
-
-      let adjustedValue = 0;
-      let marketValue = 0;
-      const teamFit = getTeamFit(player, openSlots, hasFilledSlots);
-      const roleScarcityMultiplier = getRoleScarcityDetails(player, roleScarcityBySlot);
-      const combinedFitMultiplier = combineFitMultipliers({
-        roleScarcityMultiplier,
-        teamFitMultiplier: teamFit.teamFitMultiplier,
-      });
-      if (auctionDetails.rosterable) {
-        const marketDetails = marketDetailsById.get(String(player._id)) || {
-          rosterable: false,
-          marketAuctionBaseValue: 0,
-        };
-        if (marketDetails.rosterable) {
-          marketValue = ABOVE_REPLACEMENT_VALUE_FLOOR;
-          const marketWeight = toMarketWeight(marketDetails.marketAuctionBaseValue);
-          if (marketWeight > 0 && maxRemainingMarketAuctionWeight > 0 && marketEliteValueTarget > 0) {
-            marketValue = Math.max(
-              ABOVE_REPLACEMENT_VALUE_FLOOR,
-              Math.round((marketWeight / maxRemainingMarketAuctionWeight) * marketEliteValueTarget)
-            );
-          }
-        }
-        if (marketValue > 0 && budgetAdjustmentFactor > 0) {
-          adjustedValue = Math.max(
-            ABOVE_REPLACEMENT_VALUE_FLOOR,
-            Math.round(marketValue * budgetAdjustmentFactor * combinedFitMultiplier)
-          );
-        }
-        adjustedValue = Math.min(adjustedValue, maxBid);
-      } else {
-        marketValue = computeBelowReplacementValue({
-          player,
-          marketReplacementLevel: marketPool.replacementLevel,
-          teamFitMultiplier: combinedFitMultiplier,
-          maxBid,
-        });
-        adjustedValue = marketValue;
-      }
-
-      return {
-        ...player,
-        marketValue,
-        rosterable: auctionDetails.rosterable,
-        maxBid,
-        adjustedValue,
-      };
-    }),
+    players: playersWithEligibleSlots.map((player) => buildValuationRow({
+      player,
+      auctionDetailsById,
+      marketDetailsById,
+      marketPool,
+      maxRemainingMarketAuctionWeight,
+      marketEliteValueTarget,
+      budgetAdjustmentFactor,
+      maxBid: rosterBudgetState.maxBid,
+      openSlots,
+      hasFilledSlots,
+      roleScarcityBySlot,
+    })),
   };
 }
 

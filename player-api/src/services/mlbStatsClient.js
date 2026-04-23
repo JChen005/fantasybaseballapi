@@ -3,6 +3,7 @@ const MLB_HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload/w_2
 const MLB_SPORT_ID = 1;
 const PEOPLE_BATCH_SIZE = 25;
 const STATS_HYDRATE = 'stats(group=[hitting,pitching],type=[season,yearByYear])';
+const PEOPLE_DETAILS_HYDRATE = `currentTeam,${STATS_HYDRATE}`;
 
 const AL_TEAMS = new Set([
   'BAL',
@@ -85,6 +86,12 @@ async function fetchActiveRosterForTeam({ teamId, season }) {
   return Array.isArray(payload.roster) ? payload.roster : [];
 }
 
+async function fetch40ManRosterForTeam({ teamId, season }) {
+  const url = `${MLB_STATS_API_BASE}/teams/${teamId}/roster?rosterType=40Man&season=${season}`;
+  const payload = await fetchJson(url);
+  return Array.isArray(payload.roster) ? payload.roster : [];
+}
+
 async function fetchDepthChartForTeam({ teamId }) {
   const url = `${MLB_STATS_API_BASE}/teams/${teamId}/roster/depthChart`;
   const payload = await fetchJson(url);
@@ -103,6 +110,10 @@ function statsHydrateParam() {
   return encodeURIComponent(STATS_HYDRATE);
 }
 
+function peopleDetailsHydrateParam() {
+  return encodeURIComponent(PEOPLE_DETAILS_HYDRATE);
+}
+
 async function fetchPeopleStats(personIds) {
   const ids = personIds.filter(Boolean);
   if (ids.length === 0) return new Map();
@@ -119,11 +130,39 @@ async function fetchPeopleStats(personIds) {
   return new Map(people.map((person) => [person.id, person]));
 }
 
+async function fetchPeopleDetails(personIds) {
+  const ids = personIds.filter(Boolean);
+  if (ids.length === 0) return new Map();
+
+  const people = [];
+  for (const batch of chunk(ids, PEOPLE_BATCH_SIZE)) {
+    const url = `${MLB_STATS_API_BASE}/people?personIds=${batch.join(',')}&hydrate=${peopleDetailsHydrateParam()}`;
+    const payload = await fetchJson(url);
+    if (Array.isArray(payload.people)) {
+      people.push(...payload.people);
+    }
+  }
+
+  return new Map(people.map((person) => [person.id, person]));
+}
+
+async function searchPeopleByName(query) {
+  const normalizedQuery = normalizeWhitespace(query);
+  if (!normalizedQuery) return [];
+
+  const url = `${MLB_STATS_API_BASE}/people/search?names=${encodeURIComponent(normalizedQuery)}`;
+  const payload = await fetchJson(url);
+  return Array.isArray(payload.people) ? payload.people : [];
+}
+
 module.exports = {
   buildHeadshotUrl,
+  fetch40ManRosterForTeam,
   fetchActiveRosterForTeam,
   fetchDepthChartForTeam,
   fetchMlbTeams,
+  fetchPeopleDetails,
+  searchPeopleByName,
   fetchPeopleStats,
   normalizePosition,
   normalizeTeamCode,

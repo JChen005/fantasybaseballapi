@@ -1,13 +1,17 @@
 const {
   buildHeadshotUrl,
+  fetch40ManRosterForTeam,
   fetchActiveRosterForTeam,
   fetchDepthChartForTeam,
   fetchMlbTeams,
+  fetchPeopleDetails,
   fetchPeopleStats,
   normalizeTeamCode,
   normalizeWhitespace,
+  searchPeopleByName,
   toLeague,
 } = require('./mlbStatsClient');
+const Player = require('../models/Player');
 const {
   buildDepthIndex,
   buildDepthRoleFromEntry,
@@ -26,8 +30,20 @@ function buildTransaction(player, season) {
   return [{
     date: `${season}-01-01`,
     type: 'Roster Sync',
-    detail: `${player.name} synced from MLB Stats API active roster and depth chart data.`,
+    detail: `${player.name} synced from MLB Stats API active roster, 40-man roster, and depth chart data.`,
   }];
+}
+
+function normalizeRosterStatus(value, isActiveRoster) {
+  const normalized = normalizeWhitespace(value).toUpperCase();
+
+  if (isActiveRoster) return 'ACTIVE';
+  if (!normalized) return 'UNKNOWN';
+  if (normalized.includes('INJURED') || normalized.includes('IL')) return 'IL';
+  if (normalized.includes('REHAB')) return 'REHAB';
+  if (normalized.includes('OPTION')) return 'OPTIONED';
+  if (normalized.includes('MINOR')) return 'MINORS';
+  return normalized.replace(/\s+/g, '_');
 }
 
 function getStatSplits(person, { group, type }) {
@@ -230,12 +246,19 @@ function computeBaseValue(stats, { depthRank, primarySlot, positions = [] } = {}
 
 async function fetchTeamRosterSnapshot({ teamId, teamCode, season }) {
   let activeRoster = [];
+  let fortyManRoster = [];
   let depthEntries = [];
 
   try {
     activeRoster = await fetchActiveRosterForTeam({ teamId, season });
   } catch (error) {
     console.warn(`Failed to fetch active roster for team ${teamId}: ${error.message}`);
+  }
+
+  try {
+    fortyManRoster = await fetch40ManRosterForTeam({ teamId, season });
+  } catch (error) {
+    console.warn(`Failed to fetch 40-man roster for team ${teamId}: ${error.message}`);
   }
 
   try {
@@ -247,6 +270,8 @@ async function fetchTeamRosterSnapshot({ teamId, teamCode, season }) {
   return {
     activeRoster,
     activeRosterIds: new Set(activeRoster.map((entry) => entry?.person?.id).filter(Boolean)),
+    fortyManRoster,
+    fortyManRosterIds: new Set(fortyManRoster.map((entry) => entry?.person?.id).filter(Boolean)),
     depthEntries,
     depthIndex: buildDepthIndex(depthEntries),
     teamCode,
@@ -264,57 +289,221 @@ async function fetchMlbRosterPlayers({ season }) {
     if (!teamId || !teamCode) continue;
 
     const snapshot = await fetchTeamRosterSnapshot({ teamId, teamCode, season });
+    const rosterEntriesByPlayerId = new Map();
+
+    for (const entry of snapshot.fortyManRoster) {
+      if (!entry?.person?.id) continue;
+      rosterEntriesByPlayerId.set(entry.person.id, {
+        entry,
+        sourceRosterScope: 'FORTY_MAN',
+      });
+    }
+
     for (const entry of snapshot.activeRoster) {
       if (!entry?.person?.id) continue;
+      rosterEntriesByPlayerId.set(entry.person.id, {
+        entry,
+        sourceRosterScope: 'ACTIVE',
+      });
+    }
+
+    for (const { entry, sourceRosterScope } of rosterEntriesByPlayerId.values()) {
       rosterEntries.push({
         entry,
         teamId,
         teamCode,
         depthInfo: snapshot.depthIndex.get(entry.person.id) || null,
+        isActiveRoster: snapshot.activeRosterIds.has(entry.person.id),
+        sourceRosterScope,
       });
     }
   }
 
   const peopleById = await fetchPeopleStats(rosterEntries.map(({ entry }) => entry.person.id));
 
-  return rosterEntries.map(({ entry, teamId, teamCode, depthInfo }) => {
-    const positionInputs = [
-      entry.position?.abbreviation,
-      entry.position?.code,
-      entry.position?.name,
-      entry.position?.type,
-      ...(depthInfo?.positions || []),
-    ];
-    const positions = buildEligibility(positionInputs);
-    const person = peopleById.get(entry.person.id);
-    const playerStats = buildPlayerStats(person, season);
-
-    return {
-      name: normalizeWhitespace(entry.person.fullName),
-      canonicalName: normalizeWhitespace(entry.person.fullName),
-      mlbPlayerId: entry.person.id,
-      mlbTeamId: teamId,
-      team: teamCode,
-      mlbLeague: toLeague(teamCode),
-      positions,
-      eligibility: positions,
-      injuryStatus: normalizeWhitespace(depthInfo?.status || entry.status?.description || 'HEALTHY') || 'HEALTHY',
-      depthRole: depthInfo?.depthRole || buildDepthRoleFromEntry(entry),
-      ...playerStats,
-      baseValue: computeBaseValue(playerStats.statsLastYear, {
-        depthRank: Number.isInteger(depthInfo?.depthRank) ? depthInfo.depthRank : null,
-        primarySlot: depthInfo?.primarySlot || null,
-        positions,
-      }),
-      isCustom: false,
-      isDrafted: false,
-      headshotUrl: buildHeadshotUrl(entry.person.id),
+  return rosterEntries.map(({ entry, teamId, teamCode, depthInfo, isActiveRoster, sourceRosterScope }) =>
+    buildPlayerDocumentFromPerson({
+      person: peopleById.get(entry.person.id) || entry.person,
+      teamCode,
+      teamId,
+      depthInfo,
+      rosterEntry: entry,
+      season,
+      isActiveRoster,
+      sourceRosterScope,
       dataSources: ['mlbStatsApi', 'mlbDepthChart'],
-      isActiveRoster: true,
-      lastSeenInSyncAt: new Date(),
-      lastSyncedAt: new Date(),
-    };
+    })
+  );
+}
+
+function buildPlayerDocumentFromPerson({
+  person,
+  teamCode,
+  teamId,
+  depthInfo,
+  rosterEntry,
+  season,
+  isActiveRoster,
+  sourceRosterScope,
+  dataSources,
+}) {
+  const positionInputs = [
+    person?.primaryPosition?.abbreviation,
+    person?.primaryPosition?.code,
+    person?.primaryPosition?.name,
+    person?.primaryPosition?.type,
+    rosterEntry?.position?.abbreviation,
+    rosterEntry?.position?.code,
+    rosterEntry?.position?.name,
+    rosterEntry?.position?.type,
+    ...(depthInfo?.positions || []),
+  ];
+  const positions = buildEligibility(positionInputs);
+  const playerStats = buildPlayerStats(person, season);
+  const injuryStatus = normalizeWhitespace(depthInfo?.status || rosterEntry?.status?.description || 'HEALTHY') || 'HEALTHY';
+  const rosterStatus = normalizeRosterStatus(rosterEntry?.status?.description || depthInfo?.status, isActiveRoster);
+  const playerName = normalizeWhitespace(person.fullName);
+
+  return {
+    name: playerName,
+    canonicalName: playerName,
+    mlbPlayerId: person.id,
+    mlbTeamId: teamId,
+    team: teamCode,
+    mlbLeague: toLeague(teamCode),
+    positions,
+    eligibility: positions,
+    injuryStatus,
+    depthRole: depthInfo?.depthRole || buildDepthRoleFromEntry(rosterEntry || { position: person.primaryPosition || {} }),
+    ...playerStats,
+    baseValue: computeBaseValue(playerStats.statsLastYear, {
+      depthRank: Number.isInteger(depthInfo?.depthRank) ? depthInfo.depthRank : null,
+      primarySlot: depthInfo?.primarySlot || null,
+      positions,
+    }),
+    isCustom: false,
+    isDrafted: false,
+    isMlbRelevant: true,
+    rosterStatus,
+    sourceRosterScope,
+    headshotUrl: buildHeadshotUrl(person.id),
+    dataSources,
+    isActiveRoster,
+    lastSeenInSyncAt: new Date(),
+    lastSyncedAt: new Date(),
+  };
+}
+
+function buildTeamLookup(teams) {
+  return new Map(
+    teams
+      .filter((team) => team?.id)
+      .map((team) => [team.id, { teamId: team.id, teamCode: normalizeTeamCode(team.abbreviation || team.teamCode || team.fileCode) }])
+  );
+}
+
+function findMlbTeamInfoForPerson(person, teamById) {
+  return teamById.get(person?.currentTeam?.id) || teamById.get(person?.currentTeam?.parentOrgId) || null;
+}
+
+async function buildSearchPlayerDocument({ person, teamInfo, snapshotsByTeamId, season }) {
+  if (!snapshotsByTeamId.has(teamInfo.teamId)) {
+    snapshotsByTeamId.set(
+      teamInfo.teamId,
+      await fetchTeamRosterSnapshot({ teamId: teamInfo.teamId, teamCode: teamInfo.teamCode, season })
+    );
+  }
+
+  const snapshot = snapshotsByTeamId.get(teamInfo.teamId);
+  const activeEntry = snapshot.activeRoster.find((entry) => entry?.person?.id === person.id) || null;
+  const fortyManEntry = snapshot.fortyManRoster.find((entry) => entry?.person?.id === person.id) || null;
+  const rosterEntry = activeEntry || fortyManEntry || null;
+  const isActiveRoster = snapshot.activeRosterIds.has(person.id);
+  const sourceRosterScope = isActiveRoster
+    ? 'ACTIVE'
+    : snapshot.fortyManRosterIds.has(person.id)
+      ? 'FORTY_MAN'
+      : 'SEARCH';
+
+  return buildPlayerDocumentFromPerson({
+    person,
+    teamCode: teamInfo.teamCode,
+    teamId: teamInfo.teamId,
+    depthInfo: snapshot.depthIndex.get(person.id) || null,
+    rosterEntry,
+    season,
+    isActiveRoster,
+    sourceRosterScope,
+    dataSources: ['mlbStatsApi', 'mlbDepthChart', 'mlbSearch'],
   });
+}
+
+async function upsertPlayersByMlbSearch({ query, season = new Date().getFullYear() } = {}) {
+  const searchResults = await searchPeopleByName(query);
+  const peopleIds = searchResults.map((person) => person?.id).filter(Boolean);
+  if (!peopleIds.length) {
+    return [];
+  }
+
+  const teams = await fetchMlbTeams({ season });
+  const teamById = buildTeamLookup(teams);
+  const peopleById = await fetchPeopleDetails(peopleIds);
+  const snapshotsByTeamId = new Map();
+  const upsertedPlayers = [];
+
+  for (const personId of peopleIds) {
+    const person = peopleById.get(personId);
+    const teamInfo = findMlbTeamInfoForPerson(person, teamById);
+    if (!person || !teamInfo?.teamCode) {
+      continue;
+    }
+
+    const player = await buildSearchPlayerDocument({
+      person,
+      teamInfo,
+      snapshotsByTeamId,
+      season,
+    });
+
+    await Player.updateOne(
+      { mlbPlayerId: player.mlbPlayerId },
+      { $set: player },
+      { upsert: true }
+    );
+    upsertedPlayers.push(player);
+  }
+
+  return upsertedPlayers;
+}
+
+async function upsertPlayerByMlbId(mlbPlayerId, { season = new Date().getFullYear() } = {}) {
+  const peopleById = await fetchPeopleDetails([mlbPlayerId]);
+  const person = peopleById.get(mlbPlayerId);
+  if (!person?.currentTeam?.id) {
+    return null;
+  }
+
+  const teams = await fetchMlbTeams({ season });
+  const teamById = buildTeamLookup(teams);
+  const teamInfo = findMlbTeamInfoForPerson(person, teamById);
+  if (!teamInfo?.teamCode) {
+    return null;
+  }
+
+  const player = await buildSearchPlayerDocument({
+    person,
+    teamInfo,
+    snapshotsByTeamId: new Map(),
+    season,
+  });
+
+  await Player.updateOne(
+    { mlbPlayerId: player.mlbPlayerId },
+    { $set: player },
+    { upsert: true }
+  );
+
+  return player;
 }
 
 function dedupePlayers(players, season) {
@@ -376,4 +565,6 @@ module.exports = {
   buildHeadshotUrl,
   getTeamDepthChart,
   loadMlbSeedPlayers,
+  upsertPlayerByMlbId,
+  upsertPlayersByMlbSearch,
 };

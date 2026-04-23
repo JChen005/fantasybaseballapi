@@ -9,6 +9,11 @@ let catalogReadyPromise = null;
 
 async function ensurePlayerIndexes() {
   const existingIndexes = await Player.collection.indexes();
+  const desiredPartialFilter = {
+    mlbPlayerId: { $type: 'number' },
+    isCustom: false,
+  };
+
   for (const index of existingIndexes) {
     const isSingleFieldMlbPlayerIdIndex =
       index.name !== '_id_' &&
@@ -16,8 +21,24 @@ async function ensurePlayerIndexes() {
       Object.keys(index.key).length === 1 &&
       index.key.mlbPlayerId === 1;
 
-    if (isSingleFieldMlbPlayerIdIndex) {
+    if (!isSingleFieldMlbPlayerIdIndex) {
+      continue;
+    }
+
+    const alreadyMatchesDesiredIndex =
+      index.unique === true &&
+      JSON.stringify(index.partialFilterExpression || {}) === JSON.stringify(desiredPartialFilter);
+
+    if (alreadyMatchesDesiredIndex) {
+      continue;
+    }
+
+    try {
       await Player.collection.dropIndex(index.name);
+    } catch (error) {
+      if (error?.codeName !== 'IndexNotFound' && error?.code !== 27) {
+        throw error;
+      }
     }
   }
 
@@ -25,10 +46,7 @@ async function ensurePlayerIndexes() {
     { mlbPlayerId: 1 },
     {
       unique: true,
-      partialFilterExpression: {
-        mlbPlayerId: { $type: 'number' },
-        isCustom: false,
-      },
+      partialFilterExpression: desiredPartialFilter,
       name: 'mlbPlayerId_1',
     }
   );
@@ -206,7 +224,6 @@ async function softReseedPlayers() {
       {
         $set: {
           ...player,
-          isActiveRoster: true,
           lastSeenInSyncAt: player.lastSeenInSyncAt || player.lastSyncedAt,
         },
       },
