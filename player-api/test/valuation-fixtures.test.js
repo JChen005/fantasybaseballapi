@@ -21,12 +21,21 @@ const expectedStageFiles = [
   'after-50.request.json',
   'before-draft.request.json',
 ];
-const valuationTargetPlayer = {
-  id: 592450,
-  name: 'Aaron Judge',
-  baseValue: 120,
-  positions: ['OF', 'UTIL'],
-};
+const valuationStageIds = ['before-draft', 'after-10', 'after-50', 'after-100', 'after-130'];
+const valuationTargetPlayers = [
+  {
+    id: 592450,
+    name: 'Aaron Judge',
+    baseValue: 120,
+    positions: ['OF', 'UTIL'],
+  },
+  {
+    id: 677951,
+    name: 'Bobby Witt Jr.',
+    baseValue: 105,
+    positions: ['SS', 'UTIL'],
+  },
+];
 
 function readStageFixture(stageId) {
   return JSON.parse(fs.readFileSync(path.join(stageFixtureDir, `${stageId}.request.json`), 'utf8'));
@@ -99,20 +108,20 @@ function mockPlayerFindWithCatalog(catalog) {
 }
 
 function buildValuationCatalog() {
-  const targetPlayer = {
-    _id: '64f000000000000000000001',
-    mlbPlayerId: valuationTargetPlayer.id,
-    name: valuationTargetPlayer.name,
-    canonicalName: valuationTargetPlayer.name,
-    baseValue: valuationTargetPlayer.baseValue,
-    positions: valuationTargetPlayer.positions,
-    eligibility: valuationTargetPlayer.positions,
+  const targetPlayers = valuationTargetPlayers.map((player, index) => ({
+    _id: `64f00000000000000000000${index + 1}`,
+    mlbPlayerId: player.id,
+    name: player.name,
+    canonicalName: player.name,
+    baseValue: player.baseValue,
+    positions: player.positions,
+    eligibility: player.positions,
     mlbLeague: 'MIXED',
     isDrafted: false,
     isMlbRelevant: true,
-  };
+  }));
   const supportingPlayers = Array.from({ length: 240 }, (_, index) => ({
-    _id: `64f0000000000000000${String(index + 2).padStart(5, '0')}`,
+    _id: `64f0000000000000000${String(index + 1 + targetPlayers.length).padStart(5, '0')}`,
     mlbPlayerId: 910000 + index,
     name: `Fixture Player ${String(index + 1).padStart(3, '0')}`,
     canonicalName: `Fixture Player ${String(index + 1).padStart(3, '0')}`,
@@ -124,7 +133,7 @@ function buildValuationCatalog() {
     isMlbRelevant: true,
   }));
 
-  return [targetPlayer, ...supportingPlayers];
+  return [...targetPlayers, ...supportingPlayers];
 }
 
 afterEach(() => {
@@ -228,38 +237,37 @@ test('later stage fixtures increase Team A filled slots as draft picks accumulat
 test('same available player receives different valuations as the draft stage changes', async () => {
   mockPlayerFindWithCatalog(buildValuationCatalog());
 
-  const beforeDraft = parseValuationRequest(readStageFixture('before-draft'));
-  const afterFifty = parseValuationRequest(readStageFixture('after-50'));
-  const afterHundred = parseValuationRequest(readStageFixture('after-100'));
-  const snapshots = await Promise.all([
-    getValuationSnapshot(beforeDraft),
-    getValuationSnapshot(afterFifty),
-    getValuationSnapshot(afterHundred),
-  ]);
-  const values = snapshots.map((snapshot, index) => {
-    const player = snapshot.players.find((candidate) => candidate.mlbPlayerId === valuationTargetPlayer.id);
-    const stage = ['before-draft', 'after-50', 'after-100'][index];
-    return {
-      stage,
-      playerName: player.name,
-      adjustedValue: player.adjustedValue,
-      marketValue: player.marketValue,
-      eligibleSlots: player.eligibleSlots.join(', '),
-      fillsNeed: player.fillsNeed,
-      maxBid: player.maxBid,
-      remainingRosterSpots: snapshot.valuation.remainingRosterSpots,
-      remainingBudget: snapshot.valuation.remainingBudget,
-      budgetAdjustmentFactor: snapshot.valuation.budgetAdjustmentFactor,
-    };
-  });
+  const snapshots = await Promise.all(
+    valuationStageIds.map((stageId) => getValuationSnapshot(parseValuationRequest(readStageFixture(stageId))))
+  );
+  const values = snapshots.flatMap((snapshot, index) =>
+    valuationTargetPlayers.map((targetPlayer) => {
+      const player = snapshot.players.find((candidate) => candidate.mlbPlayerId === targetPlayer.id);
+      return {
+        stage: valuationStageIds[index],
+        playerName: player.name,
+        adjustedValue: player.adjustedValue,
+        marketValue: player.marketValue,
+        eligibleSlots: player.eligibleSlots.join(', '),
+        fillsNeed: player.fillsNeed,
+        maxBid: player.maxBid,
+        remainingRosterSpots: snapshot.valuation.remainingRosterSpots,
+        remainingBudget: snapshot.valuation.remainingBudget,
+        budgetAdjustmentFactor: snapshot.valuation.budgetAdjustmentFactor,
+      };
+    })
+  );
 
   if (process.env.VALUATION_TEST_VERBOSE === '1') {
     console.table(values);
   }
 
-  expect(values[0].adjustedValue).toBeGreaterThan(0);
-  expect(values[1].adjustedValue).not.toBe(values[0].adjustedValue);
-  expect(values[2].adjustedValue).not.toBe(values[1].adjustedValue);
-  expect(values[1].remainingRosterSpots).toBeLessThan(values[0].remainingRosterSpots);
-  expect(values[2].remainingRosterSpots).toBeLessThanOrEqual(values[1].remainingRosterSpots);
+  for (const targetPlayer of valuationTargetPlayers) {
+    const playerValues = values.filter((value) => value.playerName === targetPlayer.name);
+    expect(playerValues[0].adjustedValue).toBeGreaterThan(0);
+    expect(new Set(playerValues.map((value) => value.adjustedValue)).size).toBeGreaterThan(1);
+    for (let index = 1; index < playerValues.length; index += 1) {
+      expect(playerValues[index].remainingRosterSpots).toBeLessThanOrEqual(playerValues[index - 1].remainingRosterSpots);
+    }
+  }
 });
