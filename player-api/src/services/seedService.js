@@ -1,6 +1,4 @@
 const Player = require('../models/Player');
-const License = require('../models/License');
-const { hashApiKey, makeKeyPreview } = require('./licenseService');
 const { loadMlbSeedPlayers } = require('./mlbStatsService');
 
 const DEFAULT_MAX_PLAYER_AGE_MINUTES = 60;
@@ -102,14 +100,6 @@ function requireEnv(key) {
   return String(value).trim();
 }
 
-function getOptionalEnv(key, fallback) {
-  const value = process.env[key];
-  if (!value || !String(value).trim()) {
-    return fallback;
-  }
-  return String(value).trim();
-}
-
 function getMaxPlayerAgeMs() {
   const raw = process.env.PLAYER_SYNC_MAX_AGE_MINUTES;
   if (!raw || !String(raw).trim()) {
@@ -136,39 +126,6 @@ function getMinSyncCoverageRatio() {
   }
 
   return ratio;
-}
-
-async function ensureSeedLicense() {
-  const rawApiKey = requireEnv('PLAYER_API_LICENSE_KEY');
-  const consumerName = getOptionalEnv('PLAYER_API_LICENSE_CONSUMER', 'DraftKit Web App');
-  const keyHash = hashApiKey(rawApiKey);
-
-  const license = await License.findOneAndUpdate(
-    { keyHash },
-    {
-      $set: {
-        consumerName,
-        keyPreview: makeKeyPreview(rawApiKey),
-        isActive: true,
-      },
-      $setOnInsert: {
-        metadata: {
-          seeded: true,
-        },
-      },
-    },
-    {
-      new: true,
-      upsert: true,
-      setDefaultsOnInsert: true,
-    }
-  ).lean();
-
-  return {
-    licenseId: license._id.toString(),
-    consumerName: license.consumerName,
-    keyPreview: license.keyPreview,
-  };
 }
 
 async function getSeedStatus() {
@@ -264,13 +221,10 @@ async function softReseedPlayers() {
 }
 
 async function ensureSeedData({ force = false } = {}) {
-  const seededLicense = await ensureSeedLicense();
-
   if (force) {
     const result = await softReseedPlayers();
     return {
       ...result,
-      seededLicense,
       reason: 'forced',
     };
   }
@@ -281,7 +235,6 @@ async function ensureSeedData({ force = false } = {}) {
       inserted: 0,
       count: seedStatus.count,
       skipped: true,
-      seededLicense,
       reason: seedStatus.reason,
       newestSyncAt: seedStatus.newestSyncAt,
     };
@@ -290,7 +243,6 @@ async function ensureSeedData({ force = false } = {}) {
   const result = await softReseedPlayers();
   return {
     ...result,
-    seededLicense,
     reason: seedStatus.reason,
     previousCount: seedStatus.count,
     previousNewestSyncAt: seedStatus.newestSyncAt,

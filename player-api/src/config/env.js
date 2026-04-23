@@ -1,7 +1,6 @@
 const REQUIRED_ENV_KEYS = [
   'MONGODB_URI',
   'ADMIN_SECRET',
-  'PLAYER_API_LICENSE_KEY',
 ];
 
 function requireEnv(key) {
