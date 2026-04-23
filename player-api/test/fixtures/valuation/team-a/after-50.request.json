@@ -1,0 +1,1524 @@
+{
+  "league": {
+    "budget": 260,
+    "teamCount": 9,
+    "leagueType": "MIXED",
+    "rosterSlots": {
+      "C": 2,
+      "1B": 1,
+      "2B": 1,
+      "3B": 1,
+      "SS": 1,
+      "OF": 5,
+      "UTIL": 1,
+      "P": 9
+    }
+  },
+  "filters": {
+    "limit": 500,
+    "includeInactive": false
+  },
+  "draftState": {
+    "userTeamKey": "team-a",
+    "excludedPlayers": [
+      {
+        "playerId": 686948,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": true,
+        "playerName": "Drake Baldwin",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 669364,
+        "status": "KEEPER",
+        "cost": 23,
+        "countsAgainstBudget": true,
+        "playerName": "Xavier Edwards",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 676475,
+        "status": "KEEPER",
+        "cost": 15,
+        "countsAgainstBudget": true,
+        "playerName": "Alec Burleson",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 684007,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": true,
+        "playerName": "Shota Imanaga",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 690990,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": true,
+        "playerName": "Cade Horton",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 694297,
+        "status": "KEEPER",
+        "cost": 15,
+        "countsAgainstBudget": true,
+        "playerName": "Brandon Pfaadt",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 694819,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": true,
+        "playerName": "Jacob Misiorowski",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 691620,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Jeferson Quero",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 695490,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Edwin Arroyo",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 806965,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Starlyn Caba",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 815896,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Emil Morales",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 816113,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Eli Willits",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 682634,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Kevin Alcántara",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 800007,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Edwin Florentino",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 702281,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Robby Snelling",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 682626,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Francisco Alvarez",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 687462,
+        "status": "KEEPER",
+        "cost": 3,
+        "countsAgainstBudget": false,
+        "playerName": "Spencer Horwitz",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 677595,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": false,
+        "playerName": "Ronny Mauricio",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 682928,
+        "status": "KEEPER",
+        "cost": 20,
+        "countsAgainstBudget": false,
+        "playerName": "CJ Abrams",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 701538,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Jackson Merrill",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 671739,
+        "status": "KEEPER",
+        "cost": 20,
+        "countsAgainstBudget": false,
+        "playerName": "Michael Harris II",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 645261,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Sandy Alcantara",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 650633,
+        "status": "KEEPER",
+        "cost": 16,
+        "countsAgainstBudget": false,
+        "playerName": "Michael King",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 675911,
+        "status": "KEEPER",
+        "cost": 16,
+        "countsAgainstBudget": false,
+        "playerName": "Spencer Strider",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 808967,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Yoshinobu Yamamoto",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 682210,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Kody Hoese",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 815908,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Jesús Made",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 691616,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Hedbert Perez",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 699013,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Esmerlyn Valdez",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 694208,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Moisés Ballesteros",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 800016,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Liam Doyle",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 696100,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Hunter Goodman",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 672515,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Gabriel Moreno",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 668930,
+        "status": "KEEPER",
+        "cost": 7,
+        "countsAgainstBudget": false,
+        "playerName": "Brice Turang",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 607208,
+        "status": "KEEPER",
+        "cost": 34,
+        "countsAgainstBudget": false,
+        "playerName": "Trea Turner",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 682998,
+        "status": "KEEPER",
+        "cost": 15,
+        "countsAgainstBudget": false,
+        "playerName": "Corbin Carroll",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 691718,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Pete Crow-Armstrong",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 691023,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Jordan Walker",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 571510,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Matthew Boyd",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 605540,
+        "status": "KEEPER",
+        "cost": 4,
+        "countsAgainstBudget": false,
+        "playerName": "Brandon Woodruff",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 701649,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "James Triantos",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 702253,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Cam Collier",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 829034,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Josuar Gonzalez",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 434524,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Luis Pena",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 800473,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Jefferson Rojas",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 806959,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Joendry Vargas",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 702518,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Jett Williams",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 800543,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Josue De Paula",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 571970,
+        "status": "KEEPER",
+        "cost": 9,
+        "countsAgainstBudget": false,
+        "playerName": "Max Muncy",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 663538,
+        "status": "KEEPER",
+        "cost": 17,
+        "countsAgainstBudget": false,
+        "playerName": "Nico Hoerner",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 596019,
+        "status": "KEEPER",
+        "cost": 36,
+        "countsAgainstBudget": false,
+        "playerName": "Francisco Lindor",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 669016,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Brandon Marsh",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 695578,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "James Wood",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 656605,
+        "status": "KEEPER",
+        "cost": 7,
+        "countsAgainstBudget": false,
+        "playerName": "Mitch Keller",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 628452,
+        "status": "KEEPER",
+        "cost": 18,
+        "countsAgainstBudget": false,
+        "playerName": "Raisel Iglesias",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 695670,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Harry Ford",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 806198,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Cooper Pratt",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 696149,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Bubba Chandler",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 690997,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Nolan McLean",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 800032,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Cam Caminiti",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 672695,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Geraldo Perdomo",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 665742,
+        "status": "KEEPER",
+        "cost": 47,
+        "countsAgainstBudget": false,
+        "playerName": "Juan Soto",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 663656,
+        "status": "KEEPER",
+        "cost": 44,
+        "countsAgainstBudget": false,
+        "playerName": "Kyle Tucker",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 656941,
+        "status": "KEEPER",
+        "cost": 23,
+        "countsAgainstBudget": false,
+        "playerName": "Kyle Schwarber",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 671096,
+        "status": "KEEPER",
+        "cost": 4,
+        "countsAgainstBudget": false,
+        "playerName": "Andrew Abbott",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 642547,
+        "status": "KEEPER",
+        "cost": 25,
+        "countsAgainstBudget": false,
+        "playerName": "Freddy Peralta",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 694973,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Paul Skenes",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 641482,
+        "status": "KEEPER",
+        "cost": 14,
+        "countsAgainstBudget": false,
+        "playerName": "Nestor Cortes",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 695505,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Chase Burns",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 691725,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Andrew Painter",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 695076,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Rhett Lowder",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 800038,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Aiva Arquette",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 678707,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Cristian Hernandez",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 815787,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Ethan Holliday",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 814409,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Seaver King",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 800042,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Ethan Conrad",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 571448,
+        "status": "KEEPER",
+        "cost": 11,
+        "countsAgainstBudget": false,
+        "playerName": "Nolan Arenado",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 686217,
+        "status": "KEEPER",
+        "cost": 15,
+        "countsAgainstBudget": false,
+        "playerName": "Sal Frelick",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 694192,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Jackson Chourio",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 686611,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": false,
+        "playerName": "Dylan Crews",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 625643,
+        "status": "KEEPER",
+        "cost": 4,
+        "countsAgainstBudget": false,
+        "playerName": "Reynaldo López",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 700241,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Michael McGreevy",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 519242,
+        "status": "KEEPER",
+        "cost": 15,
+        "countsAgainstBudget": false,
+        "playerName": "Chris Sale",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 592791,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Jameson Taillon",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 663903,
+        "status": "KEEPER",
+        "cost": 4,
+        "countsAgainstBudget": false,
+        "playerName": "Brady Singer",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 691788,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Joe Mack",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 691775,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Ryan Clifford",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 808963,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Roki Sasaki",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 701656,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Logan Henderson",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 804636,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Jonah Tong",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 806258,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Thomas White",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 683737,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Michael Busch",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 656976,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Pavin Smith",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 691026,
+        "status": "KEEPER",
+        "cost": 10,
+        "countsAgainstBudget": false,
+        "playerName": "Masyn Winn",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 660670,
+        "status": "KEEPER",
+        "cost": 31,
+        "countsAgainstBudget": false,
+        "playerName": "Ronald Acuna Jr.",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 573262,
+        "status": "KEEPER",
+        "cost": 2,
+        "countsAgainstBudget": false,
+        "playerName": "Mike Yastrzemski",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 666157,
+        "status": "KEEPER",
+        "cost": 7,
+        "countsAgainstBudget": false,
+        "playerName": "Nick Lodolo",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 666200,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Jesus Luzardo",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 687221,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Dalton Rushing",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 701398,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Sal Stewart",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 702222,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Justin Crawford",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 702261,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Termarr Johnson",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 829162,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Steele Hall",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 805795,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Aidan Miller",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 805999,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "A.J. Ewing",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 693311,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Tink Hence",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 608348,
+        "status": "KEEPER",
+        "cost": 2,
+        "countsAgainstBudget": false,
+        "playerName": "Carson Kelly",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 518692,
+        "status": "KEEPER",
+        "cost": 31,
+        "countsAgainstBudget": false,
+        "playerName": "Freddie Freeman",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 682829,
+        "status": "KEEPER",
+        "cost": 15,
+        "countsAgainstBudget": false,
+        "playerName": "Elly De La Cruz",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 621020,
+        "status": "KEEPER",
+        "cost": 8,
+        "countsAgainstBudget": false,
+        "playerName": "Dansby Swanson",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 808982,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": false,
+        "playerName": "Jung Hoo Lee",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 676917,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": false,
+        "playerName": "Cade Cavalli",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 657277,
+        "status": "KEEPER",
+        "cost": 28,
+        "countsAgainstBudget": false,
+        "playerName": "Logan Webb",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 683357,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Owen Caissie",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 666206,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Delvin Pérez",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 690992,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Ed Howard",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 666183,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Hunter Bishop",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 687551,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Drew Gilbert",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 687431,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Hudson Head",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 701527,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Mike Sirota",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 814439,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Ryan Waldschmidt",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 682663,
+        "status": "KEEPER",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Agustin Ramirez",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 592518,
+        "status": "KEEPER",
+        "cost": 33,
+        "countsAgainstBudget": false,
+        "playerName": "Manny Machado",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 642715,
+        "status": "KEEPER",
+        "cost": 11,
+        "countsAgainstBudget": false,
+        "playerName": "Willy Adames",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 687363,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": false,
+        "playerName": "Victor Scott II",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 673548,
+        "status": "KEEPER",
+        "cost": 18,
+        "countsAgainstBudget": false,
+        "playerName": "Seiya Suzuki",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 656550,
+        "status": "KEEPER",
+        "cost": 5,
+        "countsAgainstBudget": false,
+        "playerName": "Grant Holmes",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 650911,
+        "status": "KEEPER",
+        "cost": 9,
+        "countsAgainstBudget": false,
+        "playerName": "Cristopher Sanchez",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 601713,
+        "status": "KEEPER",
+        "cost": 13,
+        "countsAgainstBudget": false,
+        "playerName": "Nick Pivetta",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 592662,
+        "status": "KEEPER",
+        "cost": 15,
+        "countsAgainstBudget": false,
+        "playerName": "Robbie Ray",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 660271,
+        "status": "KEEPER",
+        "cost": 46,
+        "countsAgainstBudget": false,
+        "playerName": "Shohei Ohtani",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 800076,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Seth Hernandez",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 804606,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Konnor Griffin",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 806956,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Ethan Salas",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 823787,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Rainiel Rodriguez",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 806957,
+        "status": "RESERVE",
+        "cost": 0,
+        "countsAgainstBudget": false,
+        "playerName": "Alfredo Duno",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 661388,
+        "status": "DRAFTED",
+        "cost": 25,
+        "countsAgainstBudget": false,
+        "playerName": "William Contreras",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 695734,
+        "status": "DRAFTED",
+        "cost": 12,
+        "countsAgainstBudget": false,
+        "playerName": "Daylen Lile",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 665487,
+        "status": "DRAFTED",
+        "cost": 43,
+        "countsAgainstBudget": false,
+        "playerName": "Fernando Tatis Jr.",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 605141,
+        "status": "DRAFTED",
+        "cost": 28,
+        "countsAgainstBudget": false,
+        "playerName": "Mookie Betts",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 606466,
+        "status": "DRAFTED",
+        "cost": 38,
+        "countsAgainstBudget": false,
+        "playerName": "Ketel Marte",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 543760,
+        "status": "DRAFTED",
+        "cost": 18,
+        "countsAgainstBudget": false,
+        "playerName": "Marcus Semien",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 547180,
+        "status": "DRAFTED",
+        "cost": 36,
+        "countsAgainstBudget": false,
+        "playerName": "Bryce Harper",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 666182,
+        "status": "DRAFTED",
+        "cost": 33,
+        "countsAgainstBudget": false,
+        "playerName": "Bo Bichette",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 645277,
+        "status": "DRAFTED",
+        "cost": 25,
+        "countsAgainstBudget": false,
+        "playerName": "Ozzie Albies",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 553993,
+        "status": "DRAFTED",
+        "cost": 25,
+        "countsAgainstBudget": false,
+        "playerName": "Eugenio Suárez",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 663586,
+        "status": "DRAFTED",
+        "cost": 31,
+        "countsAgainstBudget": false,
+        "playerName": "Austin Riley",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 500743,
+        "status": "DRAFTED",
+        "cost": 1,
+        "countsAgainstBudget": false,
+        "playerName": "Miguel Rojas",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 608324,
+        "status": "DRAFTED",
+        "cost": 26,
+        "countsAgainstBudget": false,
+        "playerName": "Alex Bregman",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 605483,
+        "status": "DRAFTED",
+        "cost": 11,
+        "countsAgainstBudget": false,
+        "playerName": "Blake Snell",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 668678,
+        "status": "DRAFTED",
+        "cost": 15,
+        "countsAgainstBudget": false,
+        "playerName": "Zac Gallen",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 695243,
+        "status": "DRAFTED",
+        "cost": 32,
+        "countsAgainstBudget": false,
+        "playerName": "Mason Miller",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 672640,
+        "status": "DRAFTED",
+        "cost": 13,
+        "countsAgainstBudget": true,
+        "playerName": "Otto Lopez",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 678662,
+        "status": "DRAFTED",
+        "cost": 11,
+        "countsAgainstBudget": false,
+        "playerName": "Ezequiel Tovar",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 656305,
+        "status": "DRAFTED",
+        "cost": 20,
+        "countsAgainstBudget": true,
+        "playerName": "Matt Chapman",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 664761,
+        "status": "DRAFTED",
+        "cost": 11,
+        "countsAgainstBudget": false,
+        "playerName": "Alec Bohm",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 621566,
+        "status": "DRAFTED",
+        "cost": 35,
+        "countsAgainstBudget": true,
+        "playerName": "Matt Olson",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 669065,
+        "status": "DRAFTED",
+        "cost": 17,
+        "countsAgainstBudget": false,
+        "playerName": "Kyle Stowers",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 607192,
+        "status": "DRAFTED",
+        "cost": 18,
+        "countsAgainstBudget": false,
+        "playerName": "Tyler Glasnow",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 669257,
+        "status": "DRAFTED",
+        "cost": 18,
+        "countsAgainstBudget": false,
+        "playerName": "Will Smith",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 621242,
+        "status": "DRAFTED",
+        "cost": 31,
+        "countsAgainstBudget": false,
+        "playerName": "Edwin Díaz",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 677651,
+        "status": "DRAFTED",
+        "cost": 11,
+        "countsAgainstBudget": false,
+        "playerName": "Luis Garcia",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 691587,
+        "status": "DRAFTED",
+        "cost": 25,
+        "countsAgainstBudget": false,
+        "playerName": "Eury Pérez",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 673357,
+        "status": "DRAFTED",
+        "cost": 27,
+        "countsAgainstBudget": false,
+        "playerName": "Luis Robert Jr.",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 664040,
+        "status": "DRAFTED",
+        "cost": 18,
+        "countsAgainstBudget": true,
+        "playerName": "Brandon Lowe",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 642207,
+        "status": "DRAFTED",
+        "cost": 18,
+        "countsAgainstBudget": true,
+        "playerName": "Devin Williams",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 664023,
+        "status": "DRAFTED",
+        "cost": 17,
+        "countsAgainstBudget": true,
+        "playerName": "Ian Happ",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 605400,
+        "status": "DRAFTED",
+        "cost": 9,
+        "countsAgainstBudget": false,
+        "playerName": "Aaron Nola",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 670770,
+        "status": "DRAFTED",
+        "cost": 8,
+        "countsAgainstBudget": false,
+        "playerName": "TJ Friedl",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 661395,
+        "status": "DRAFTED",
+        "cost": 30,
+        "countsAgainstBudget": false,
+        "playerName": "Jhoan Duran",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 593428,
+        "status": "DRAFTED",
+        "cost": 7,
+        "countsAgainstBudget": false,
+        "playerName": "Xander Bogaerts",
+        "teamKey": "team-e"
+      },
+      {
+        "playerId": 646240,
+        "status": "DRAFTED",
+        "cost": 33,
+        "countsAgainstBudget": false,
+        "playerName": "Rafael Devers",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 518876,
+        "status": "DRAFTED",
+        "cost": 12,
+        "countsAgainstBudget": false,
+        "playerName": "Merrill Kelly",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 593871,
+        "status": "DRAFTED",
+        "cost": 20,
+        "countsAgainstBudget": false,
+        "playerName": "Jorge Polanco",
+        "teamKey": "team-g"
+      },
+      {
+        "playerId": 666160,
+        "status": "DRAFTED",
+        "cost": 16,
+        "countsAgainstBudget": false,
+        "playerName": "Mickey Moniak",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 554430,
+        "status": "DRAFTED",
+        "cost": 21,
+        "countsAgainstBudget": false,
+        "playerName": "Zack Wheeler",
+        "teamKey": "team-d"
+      },
+      {
+        "playerId": 686218,
+        "status": "DRAFTED",
+        "cost": 20,
+        "countsAgainstBudget": false,
+        "playerName": "Emmet Sheehan",
+        "teamKey": "team-h"
+      },
+      {
+        "playerId": 606192,
+        "status": "DRAFTED",
+        "cost": 18,
+        "countsAgainstBudget": true,
+        "playerName": "Teoscar Hernández",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 694037,
+        "status": "DRAFTED",
+        "cost": 18,
+        "countsAgainstBudget": false,
+        "playerName": "Daniel Palencia",
+        "teamKey": "team-b"
+      },
+      {
+        "playerId": 668715,
+        "status": "DRAFTED",
+        "cost": 16,
+        "countsAgainstBudget": false,
+        "playerName": "Spencer Steer",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 686668,
+        "status": "DRAFTED",
+        "cost": 14,
+        "countsAgainstBudget": false,
+        "playerName": "Brenton Doyle",
+        "teamKey": "team-i"
+      },
+      {
+        "playerId": 681082,
+        "status": "DRAFTED",
+        "cost": 17,
+        "countsAgainstBudget": false,
+        "playerName": "Bryson Stott",
+        "teamKey": "team-c"
+      },
+      {
+        "playerId": 605397,
+        "status": "DRAFTED",
+        "cost": 5,
+        "countsAgainstBudget": true,
+        "playerName": "Joe Musgrove",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 467793,
+        "status": "DRAFTED",
+        "cost": 5,
+        "countsAgainstBudget": true,
+        "playerName": "Carlos Santana",
+        "teamKey": "team-a"
+      },
+      {
+        "playerId": 592663,
+        "status": "DRAFTED",
+        "cost": 7,
+        "countsAgainstBudget": false,
+        "playerName": "J.T. Realmuto",
+        "teamKey": "team-f"
+      },
+      {
+        "playerId": 656730,
+        "status": "DRAFTED",
+        "cost": 17,
+        "countsAgainstBudget": false,
+        "playerName": "Trevor Megill",
+        "teamKey": "team-g"
+      }
+    ],
+    "filledSlots": {
+      "C": 1,
+      "2B": 1,
+      "OF": 3,
+      "P": 6,
+      "SS": 1,
+      "3B": 1,
+      "1B": 1,
+      "UTIL": 1
+    }
+  }
+}

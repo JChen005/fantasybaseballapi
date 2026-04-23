@@ -1,0 +1,1536 @@
+[
+  {
+    "pickNumber": 1,
+    "round": 1,
+    "teamKey": "team-d",
+    "playerId": 661388,
+    "playerName": "William Contreras",
+    "cost": 25,
+    "status": "DRAFTED",
+    "positions": [
+      "C"
+    ]
+  },
+  {
+    "pickNumber": 2,
+    "round": 1,
+    "teamKey": "team-e",
+    "playerId": 695734,
+    "playerName": "Daylen Lile",
+    "cost": 12,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 3,
+    "round": 1,
+    "teamKey": "team-h",
+    "playerId": 665487,
+    "playerName": "Fernando Tatis Jr.",
+    "cost": 43,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 4,
+    "round": 1,
+    "teamKey": "team-d",
+    "playerId": 605141,
+    "playerName": "Mookie Betts",
+    "cost": 28,
+    "status": "DRAFTED",
+    "positions": [
+      "SS"
+    ]
+  },
+  {
+    "pickNumber": 5,
+    "round": 1,
+    "teamKey": "team-f",
+    "playerId": 606466,
+    "playerName": "Ketel Marte",
+    "cost": 38,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 6,
+    "round": 1,
+    "teamKey": "team-f",
+    "playerId": 543760,
+    "playerName": "Marcus Semien",
+    "cost": 18,
+    "status": "DRAFTED",
+    "positions": [
+      "2B"
+    ]
+  },
+  {
+    "pickNumber": 7,
+    "round": 1,
+    "teamKey": "team-c",
+    "playerId": 547180,
+    "playerName": "Bryce Harper",
+    "cost": 36,
+    "status": "DRAFTED",
+    "positions": [
+      "1B"
+    ]
+  },
+  {
+    "pickNumber": 8,
+    "round": 1,
+    "teamKey": "team-h",
+    "playerId": 666182,
+    "playerName": "Bo Bichette",
+    "cost": 33,
+    "status": "DRAFTED",
+    "positions": [
+      "SS",
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 9,
+    "round": 1,
+    "teamKey": "team-g",
+    "playerId": 645277,
+    "playerName": "Ozzie Albies",
+    "cost": 25,
+    "status": "DRAFTED",
+    "positions": [
+      "2B"
+    ]
+  },
+  {
+    "pickNumber": 10,
+    "round": 2,
+    "teamKey": "team-f",
+    "playerId": 553993,
+    "playerName": "Eugenio Suárez",
+    "cost": 25,
+    "status": "DRAFTED",
+    "positions": [
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 11,
+    "round": 2,
+    "teamKey": "team-g",
+    "playerId": 663586,
+    "playerName": "Austin Riley",
+    "cost": 31,
+    "status": "DRAFTED",
+    "positions": [
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 12,
+    "round": 2,
+    "teamKey": "team-f",
+    "playerId": 500743,
+    "playerName": "Miguel Rojas",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": [
+      "2B"
+    ]
+  },
+  {
+    "pickNumber": 13,
+    "round": 2,
+    "teamKey": "team-b",
+    "playerId": 608324,
+    "playerName": "Alex Bregman",
+    "cost": 26,
+    "status": "DRAFTED",
+    "positions": [
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 14,
+    "round": 2,
+    "teamKey": "team-c",
+    "playerId": 605483,
+    "playerName": "Blake Snell",
+    "cost": 11,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 15,
+    "round": 2,
+    "teamKey": "team-g",
+    "playerId": 668678,
+    "playerName": "Zac Gallen",
+    "cost": 15,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 16,
+    "round": 2,
+    "teamKey": "team-b",
+    "playerId": 695243,
+    "playerName": "Mason Miller",
+    "cost": 32,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 17,
+    "round": 2,
+    "teamKey": "team-a",
+    "playerId": 672640,
+    "playerName": "Otto Lopez",
+    "cost": 13,
+    "status": "DRAFTED",
+    "positions": [
+      "2B",
+      "SS"
+    ]
+  },
+  {
+    "pickNumber": 18,
+    "round": 2,
+    "teamKey": "team-i",
+    "playerId": 678662,
+    "playerName": "Ezequiel Tovar",
+    "cost": 11,
+    "status": "DRAFTED",
+    "positions": [
+      "SS"
+    ]
+  },
+  {
+    "pickNumber": 19,
+    "round": 3,
+    "teamKey": "team-a",
+    "playerId": 656305,
+    "playerName": "Matt Chapman",
+    "cost": 20,
+    "status": "DRAFTED",
+    "positions": [
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 20,
+    "round": 3,
+    "teamKey": "team-i",
+    "playerId": 664761,
+    "playerName": "Alec Bohm",
+    "cost": 11,
+    "status": "DRAFTED",
+    "positions": [
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 21,
+    "round": 3,
+    "teamKey": "team-a",
+    "playerId": 621566,
+    "playerName": "Matt Olson",
+    "cost": 35,
+    "status": "DRAFTED",
+    "positions": [
+      "1B"
+    ]
+  },
+  {
+    "pickNumber": 22,
+    "round": 3,
+    "teamKey": "team-c",
+    "playerId": 669065,
+    "playerName": "Kyle Stowers",
+    "cost": 17,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 23,
+    "round": 3,
+    "teamKey": "team-c",
+    "playerId": 607192,
+    "playerName": "Tyler Glasnow",
+    "cost": 18,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 24,
+    "round": 3,
+    "teamKey": "team-d",
+    "playerId": 669257,
+    "playerName": "Will Smith",
+    "cost": 18,
+    "status": "DRAFTED",
+    "positions": [
+      "C"
+    ]
+  },
+  {
+    "pickNumber": 25,
+    "round": 3,
+    "teamKey": "team-c",
+    "playerId": 621242,
+    "playerName": "Edwin Díaz",
+    "cost": 31,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 26,
+    "round": 3,
+    "teamKey": "team-b",
+    "playerId": 677651,
+    "playerName": "Luis Garcia",
+    "cost": 11,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 27,
+    "round": 3,
+    "teamKey": "team-c",
+    "playerId": 691587,
+    "playerName": "Eury Pérez",
+    "cost": 25,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 28,
+    "round": 4,
+    "teamKey": "team-i",
+    "playerId": 673357,
+    "playerName": "Luis Robert Jr.",
+    "cost": 27,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 29,
+    "round": 4,
+    "teamKey": "team-a",
+    "playerId": 664040,
+    "playerName": "Brandon Lowe",
+    "cost": 18,
+    "status": "DRAFTED",
+    "positions": [
+      "2B"
+    ]
+  },
+  {
+    "pickNumber": 30,
+    "round": 4,
+    "teamKey": "team-a",
+    "playerId": 642207,
+    "playerName": "Devin Williams",
+    "cost": 18,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 31,
+    "round": 4,
+    "teamKey": "team-a",
+    "playerId": 664023,
+    "playerName": "Ian Happ",
+    "cost": 17,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 32,
+    "round": 4,
+    "teamKey": "team-d",
+    "playerId": 605400,
+    "playerName": "Aaron Nola",
+    "cost": 9,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 33,
+    "round": 4,
+    "teamKey": "team-d",
+    "playerId": 670770,
+    "playerName": "TJ Friedl",
+    "cost": 8,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 34,
+    "round": 4,
+    "teamKey": "team-b",
+    "playerId": 661395,
+    "playerName": "Jhoan Duran",
+    "cost": 30,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 35,
+    "round": 4,
+    "teamKey": "team-e",
+    "playerId": 593428,
+    "playerName": "Xander Bogaerts",
+    "cost": 7,
+    "status": "DRAFTED",
+    "positions": [
+      "SS"
+    ]
+  },
+  {
+    "pickNumber": 36,
+    "round": 4,
+    "teamKey": "team-g",
+    "playerId": 646240,
+    "playerName": "Rafael Devers",
+    "cost": 33,
+    "status": "DRAFTED",
+    "positions": [
+      "1B"
+    ]
+  },
+  {
+    "pickNumber": 37,
+    "round": 5,
+    "teamKey": "team-d",
+    "playerId": 518876,
+    "playerName": "Merrill Kelly",
+    "cost": 12,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 38,
+    "round": 5,
+    "teamKey": "team-g",
+    "playerId": 593871,
+    "playerName": "Jorge Polanco",
+    "cost": 20,
+    "status": "DRAFTED",
+    "positions": [
+      "1B"
+    ]
+  },
+  {
+    "pickNumber": 39,
+    "round": 5,
+    "teamKey": "team-f",
+    "playerId": 666160,
+    "playerName": "Mickey Moniak",
+    "cost": 16,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 40,
+    "round": 5,
+    "teamKey": "team-d",
+    "playerId": 554430,
+    "playerName": "Zack Wheeler",
+    "cost": 21,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 41,
+    "round": 5,
+    "teamKey": "team-h",
+    "playerId": 686218,
+    "playerName": "Emmet Sheehan",
+    "cost": 20,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 42,
+    "round": 5,
+    "teamKey": "team-a",
+    "playerId": 606192,
+    "playerName": "Teoscar Hernández",
+    "cost": 18,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 43,
+    "round": 5,
+    "teamKey": "team-b",
+    "playerId": 694037,
+    "playerName": "Daniel Palencia",
+    "cost": 18,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 44,
+    "round": 5,
+    "teamKey": "team-f",
+    "playerId": 668715,
+    "playerName": "Spencer Steer",
+    "cost": 16,
+    "status": "DRAFTED",
+    "positions": [
+      "1B",
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 45,
+    "round": 5,
+    "teamKey": "team-i",
+    "playerId": 686668,
+    "playerName": "Brenton Doyle",
+    "cost": 14,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 46,
+    "round": 6,
+    "teamKey": "team-c",
+    "playerId": 681082,
+    "playerName": "Bryson Stott",
+    "cost": 17,
+    "status": "DRAFTED",
+    "positions": [
+      "2B"
+    ]
+  },
+  {
+    "pickNumber": 47,
+    "round": 6,
+    "teamKey": "team-a",
+    "playerId": 605397,
+    "playerName": "Joe Musgrove",
+    "cost": 5,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 48,
+    "round": 6,
+    "teamKey": "team-a",
+    "playerId": 467793,
+    "playerName": "Carlos Santana",
+    "cost": 5,
+    "status": "DRAFTED",
+    "positions": [
+      "1B"
+    ]
+  },
+  {
+    "pickNumber": 49,
+    "round": 6,
+    "teamKey": "team-f",
+    "playerId": 592663,
+    "playerName": "J.T. Realmuto",
+    "cost": 7,
+    "status": "DRAFTED",
+    "positions": [
+      "C"
+    ]
+  },
+  {
+    "pickNumber": 50,
+    "round": 6,
+    "teamKey": "team-g",
+    "playerId": 656730,
+    "playerName": "Trevor Megill",
+    "cost": 17,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 51,
+    "round": 6,
+    "teamKey": "team-e",
+    "playerId": 665804,
+    "playerName": "Miguel Amaya",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "C"
+    ]
+  },
+  {
+    "pickNumber": 52,
+    "round": 6,
+    "teamKey": "team-g",
+    "playerId": 665833,
+    "playerName": "Oneil Cruz",
+    "cost": 29,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 53,
+    "round": 6,
+    "teamKey": "team-h",
+    "playerId": 592885,
+    "playerName": "Christian Yelich",
+    "cost": 21,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 54,
+    "round": 6,
+    "teamKey": "team-d",
+    "playerId": 650333,
+    "playerName": "Luis Arraez",
+    "cost": 14,
+    "status": "DRAFTED",
+    "positions": [
+      "1B"
+    ]
+  },
+  {
+    "pickNumber": 55,
+    "round": 7,
+    "teamKey": "team-i",
+    "playerId": 805300,
+    "playerName": "Jakob Marsee",
+    "cost": 20,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 56,
+    "round": 7,
+    "teamKey": "team-a",
+    "playerId": 682622,
+    "playerName": "Noelvi Marte",
+    "cost": 22,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 57,
+    "round": 7,
+    "teamKey": "team-e",
+    "playerId": 689414,
+    "playerName": "Liam Hicks",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "C"
+    ]
+  },
+  {
+    "pickNumber": 58,
+    "round": 7,
+    "teamKey": "team-h",
+    "playerId": 668881,
+    "playerName": "Hunter Greene",
+    "cost": 4,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 59,
+    "round": 7,
+    "teamKey": "team-e",
+    "playerId": 641941,
+    "playerName": "Emilio Pagán",
+    "cost": 18,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 60,
+    "round": 7,
+    "teamKey": "team-f",
+    "playerId": 656811,
+    "playerName": "Ryan O'Hearn",
+    "cost": 9,
+    "status": "DRAFTED",
+    "positions": [
+      "1B",
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 61,
+    "round": 7,
+    "teamKey": "team-g",
+    "playerId": 681624,
+    "playerName": "Andy Pages",
+    "cost": 17,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 62,
+    "round": 7,
+    "teamKey": "team-h",
+    "playerId": 668804,
+    "playerName": "Bryan Reynolds",
+    "cost": 16,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 63,
+    "round": 7,
+    "teamKey": "team-i",
+    "playerId": 666023,
+    "playerName": "Freddy Fermin",
+    "cost": 4,
+    "status": "DRAFTED",
+    "positions": [
+      "C"
+    ]
+  },
+  {
+    "pickNumber": 64,
+    "round": 8,
+    "teamKey": "team-d",
+    "playerId": 680574,
+    "playerName": "Matt McLain",
+    "cost": 10,
+    "status": "DRAFTED",
+    "positions": [
+      "2B"
+    ]
+  },
+  {
+    "pickNumber": 65,
+    "round": 8,
+    "teamKey": "team-e",
+    "playerId": 676254,
+    "playerName": "Ryan Walker",
+    "cost": 9,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 66,
+    "round": 8,
+    "teamKey": "team-f",
+    "playerId": 663886,
+    "playerName": "Tyler Stephenson",
+    "cost": 7,
+    "status": "DRAFTED",
+    "positions": [
+      "C"
+    ]
+  },
+  {
+    "pickNumber": 67,
+    "round": 8,
+    "teamKey": "team-a",
+    "playerId": 656945,
+    "playerName": "Tanner Scott",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 68,
+    "round": 8,
+    "teamKey": "team-b",
+    "playerId": 665795,
+    "playerName": "Edward Cabrera",
+    "cost": 11,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 69,
+    "round": 8,
+    "teamKey": "team-b",
+    "playerId": 672275,
+    "playerName": "Patrick Bailey",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": [
+      "C"
+    ]
+  },
+  {
+    "pickNumber": 70,
+    "round": 8,
+    "teamKey": "team-h",
+    "playerId": 671218,
+    "playerName": "Heliot Ramos",
+    "cost": 10,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 71,
+    "round": 8,
+    "teamKey": "team-e",
+    "playerId": 666969,
+    "playerName": "Adolis García",
+    "cost": 11,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 72,
+    "round": 8,
+    "teamKey": "team-e",
+    "playerId": 683734,
+    "playerName": "Andrew Vaughn",
+    "cost": 17,
+    "status": "DRAFTED",
+    "positions": [
+      "1B"
+    ]
+  },
+  {
+    "pickNumber": 73,
+    "round": 9,
+    "teamKey": "team-e",
+    "playerId": 669242,
+    "playerName": "Tommy Edman",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": [
+      "2B"
+    ]
+  },
+  {
+    "pickNumber": 74,
+    "round": 9,
+    "teamKey": "team-f",
+    "playerId": 694335,
+    "playerName": "Matt Svanson",
+    "cost": 8,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 75,
+    "round": 9,
+    "teamKey": "team-f",
+    "playerId": 664126,
+    "playerName": "Pete Fairbanks",
+    "cost": 10,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 76,
+    "round": 9,
+    "teamKey": "team-h",
+    "playerId": 683146,
+    "playerName": "Brett Baty",
+    "cost": 5,
+    "status": "DRAFTED",
+    "positions": [
+      "2B",
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 77,
+    "round": 9,
+    "teamKey": "team-f",
+    "playerId": 642701,
+    "playerName": "Dennis Santana",
+    "cost": 8,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 78,
+    "round": 9,
+    "teamKey": "team-b",
+    "playerId": 671289,
+    "playerName": "Tyler Freeman",
+    "cost": 5,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 79,
+    "round": 9,
+    "teamKey": "team-f",
+    "playerId": 657656,
+    "playerName": "Ramón Laureano",
+    "cost": 12,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 80,
+    "round": 9,
+    "teamKey": "team-c",
+    "playerId": 687597,
+    "playerName": "Jordan Beck",
+    "cost": 8,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 81,
+    "round": 9,
+    "teamKey": "team-c",
+    "playerId": 650489,
+    "playerName": "Willi Castro",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "2B",
+      "3B",
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 82,
+    "round": 10,
+    "teamKey": "team-e",
+    "playerId": 681393,
+    "playerName": "Connor Norby",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": [
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 83,
+    "round": 10,
+    "teamKey": "team-h",
+    "playerId": 666214,
+    "playerName": "Joey Wentz",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 84,
+    "round": 10,
+    "teamKey": "team-f",
+    "playerId": 656464,
+    "playerName": "Kevin Ginkel",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 85,
+    "round": 10,
+    "teamKey": "team-c",
+    "playerId": 673540,
+    "playerName": "Kodai Senga",
+    "cost": 4,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 86,
+    "round": 10,
+    "teamKey": "team-i",
+    "playerId": 641816,
+    "playerName": "Tyler Mahle",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 87,
+    "round": 10,
+    "teamKey": "team-d",
+    "playerId": 682842,
+    "playerName": "Abner Uribe",
+    "cost": 5,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 88,
+    "round": 10,
+    "teamKey": "team-e",
+    "playerId": 663158,
+    "playerName": "Robert Suarez",
+    "cost": 4,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 89,
+    "round": 10,
+    "teamKey": "team-d",
+    "playerId": 669194,
+    "playerName": "Ryne Nelson",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 90,
+    "round": 10,
+    "teamKey": "team-h",
+    "playerId": 669357,
+    "playerName": "Nolan Gorman",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "2B",
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 91,
+    "round": 11,
+    "teamKey": "team-e",
+    "playerId": 691720,
+    "playerName": "Kyle Karros",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": [
+      "3B"
+    ]
+  },
+  {
+    "pickNumber": 92,
+    "round": 11,
+    "teamKey": "team-a",
+    "playerId": 676962,
+    "playerName": "Ben Brown",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 93,
+    "round": 11,
+    "teamKey": "team-a",
+    "playerId": 668964,
+    "playerName": "Tobias Myers",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 94,
+    "round": 11,
+    "teamKey": "team-b",
+    "playerId": 682990,
+    "playerName": "Quinn Priester",
+    "cost": 4,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 95,
+    "round": 11,
+    "teamKey": "team-b",
+    "playerId": 666971,
+    "playerName": "Lourdes Gurriel Jr.",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 96,
+    "round": 11,
+    "teamKey": "team-d",
+    "playerId": 807713,
+    "playerName": "Matt Shaw",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 97,
+    "round": 11,
+    "teamKey": "team-a",
+    "playerId": 657757,
+    "playerName": "Gavin Sheets",
+    "cost": 4,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 98,
+    "round": 11,
+    "teamKey": "team-i",
+    "playerId": 630105,
+    "playerName": "Jake Cronenworth",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 99,
+    "round": 11,
+    "teamKey": "team-g",
+    "playerId": 593958,
+    "playerName": "Eduardo Rodriguez",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 100,
+    "round": 12,
+    "teamKey": "team-a",
+    "playerId": 620443,
+    "playerName": "Luis Torrens",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 101,
+    "round": 12,
+    "teamKey": "team-d",
+    "playerId": 640455,
+    "playerName": "Sean Manaea",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 102,
+    "round": 12,
+    "teamKey": "team-g",
+    "playerId": 669160,
+    "playerName": "Dustin May",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 103,
+    "round": 12,
+    "teamKey": "team-b",
+    "playerId": 663968,
+    "playerName": "Jake Mangum",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 104,
+    "round": 12,
+    "teamKey": "team-c",
+    "playerId": 542303,
+    "playerName": "Marcell Ozuna",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 105,
+    "round": 12,
+    "teamKey": "team-d",
+    "playerId": 669003,
+    "playerName": "Garrett Mitchell",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 106,
+    "round": 12,
+    "teamKey": "team-i",
+    "playerId": 681198,
+    "playerName": "TJ Rumfield",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": [
+      "1B"
+    ]
+  },
+  {
+    "pickNumber": 107,
+    "round": 12,
+    "teamKey": "team-h",
+    "playerId": 656849,
+    "playerName": "David Peterson",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 108,
+    "round": 12,
+    "teamKey": "team-b",
+    "playerId": 668901,
+    "playerName": "Mark Vientos",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 109,
+    "round": 13,
+    "teamKey": "team-h",
+    "playerId": 660688,
+    "playerName": "Keibert Ruiz",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 110,
+    "round": 13,
+    "teamKey": "team-g",
+    "playerId": 663698,
+    "playerName": "Joey Bart",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 111,
+    "round": 13,
+    "teamKey": "team-b",
+    "playerId": 687401,
+    "playerName": "Joey Ortiz",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 112,
+    "round": 13,
+    "teamKey": "team-c",
+    "playerId": 691781,
+    "playerName": "Brady House",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 113,
+    "round": 13,
+    "teamKey": "team-h",
+    "playerId": 664056,
+    "playerName": "Harrison Bader",
+    "cost": 2,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 114,
+    "round": 13,
+    "teamKey": "team-i",
+    "playerId": 676974,
+    "playerName": "Max Meyer",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 115,
+    "round": 13,
+    "teamKey": "team-e",
+    "playerId": 669461,
+    "playerName": "Matthew Liberatore",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": [
+      "P"
+    ]
+  },
+  {
+    "pickNumber": 116,
+    "round": 13,
+    "teamKey": "team-a",
+    "playerId": 643565,
+    "playerName": "Mike Tauchman",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": [
+      "OF"
+    ]
+  },
+  {
+    "pickNumber": 117,
+    "round": 13,
+    "teamKey": "team-h",
+    "playerId": 694477,
+    "playerName": "Chad Patrick",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 118,
+    "round": 14,
+    "teamKey": "team-g",
+    "playerId": 680779,
+    "playerName": "Henry Davis",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 119,
+    "round": 14,
+    "teamKey": "team-i",
+    "playerId": 677952,
+    "playerName": "Braxton Ashcraft",
+    "cost": 4,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 120,
+    "round": 14,
+    "teamKey": "team-d",
+    "playerId": 663457,
+    "playerName": "Lars Nootbaar",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 121,
+    "round": 14,
+    "teamKey": "team-i",
+    "playerId": 664983,
+    "playerName": "Jake McCarthy",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 122,
+    "round": 14,
+    "teamKey": "team-e",
+    "playerId": 622761,
+    "playerName": "Jorge Mateo",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 123,
+    "round": 14,
+    "teamKey": "team-h",
+    "playerId": 681911,
+    "playerName": "Alex Vesia",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 124,
+    "round": 14,
+    "teamKey": "team-g",
+    "playerId": 592206,
+    "playerName": "Nick Castellanos",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 125,
+    "round": 14,
+    "teamKey": "team-c",
+    "playerId": 669203,
+    "playerName": "Corbin Burnes",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 126,
+    "round": 14,
+    "teamKey": "team-h",
+    "playerId": 596133,
+    "playerName": "Luke Weaver",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 127,
+    "round": 15,
+    "teamKey": "team-i",
+    "playerId": 694393,
+    "playerName": "Jaxon Wiggins",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 128,
+    "round": 15,
+    "teamKey": "team-g",
+    "playerId": 676617,
+    "playerName": "Riley O'Brien",
+    "cost": 3,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 129,
+    "round": 15,
+    "teamKey": "team-g",
+    "playerId": 605280,
+    "playerName": "Clay Holmes",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 130,
+    "round": 15,
+    "teamKey": "team-c",
+    "playerId": 680885,
+    "playerName": "Spencer Schwellenbach",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 131,
+    "round": 15,
+    "teamKey": "team-d",
+    "playerId": 676664,
+    "playerName": "JP Sears",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 132,
+    "round": 15,
+    "teamKey": "team-e",
+    "playerId": 669093,
+    "playerName": "Jeremiah Estrada",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  },
+  {
+    "pickNumber": 133,
+    "round": 15,
+    "teamKey": "team-g",
+    "playerId": 690925,
+    "playerName": "Clayton Beeter",
+    "cost": 1,
+    "status": "DRAFTED",
+    "positions": []
+  }
+]

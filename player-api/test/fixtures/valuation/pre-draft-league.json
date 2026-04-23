@@ -1,0 +1,983 @@
+{
+  "league": {
+    "budget": 260,
+    "teamCount": 9,
+    "leagueType": "MIXED",
+    "sourceRosterSlots": {
+      "C": 2,
+      "1B": 1,
+      "3B": 1,
+      "CI": 1,
+      "2B": 1,
+      "SS": 1,
+      "MI": 1,
+      "OF": 5,
+      "U": 1,
+      "P": 9
+    },
+    "valuationRosterSlots": {
+      "C": 2,
+      "1B": 1,
+      "2B": 1,
+      "3B": 1,
+      "SS": 1,
+      "OF": 5,
+      "UTIL": 1,
+      "P": 9
+    }
+  },
+  "teams": [
+    {
+      "teamKey": "team-a",
+      "teamName": "Team A",
+      "remainingBudget": 182,
+      "keepers": [
+        {
+          "sheetName": "D. Baldwin",
+          "playerName": "Drake Baldwin",
+          "slot": "C",
+          "contract": "F1",
+          "cost": 5,
+          "playerId": 686948
+        },
+        {
+          "sheetName": "X. Edwards",
+          "playerName": "Xavier Edwards",
+          "slot": "2B",
+          "contract": "S1",
+          "cost": 23,
+          "note": "Sheet notes '(2/S)'.",
+          "playerId": 669364
+        },
+        {
+          "sheetName": "A. Burleson",
+          "playerName": "Alec Burleson",
+          "slot": "OF",
+          "contract": "F3",
+          "cost": 15,
+          "note": "Sheet notes '(1/O)'.",
+          "playerId": 676475
+        },
+        {
+          "sheetName": "S. Imanaga",
+          "playerName": "Shota Imanaga",
+          "slot": "P",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 684007
+        },
+        {
+          "sheetName": "C. Horton",
+          "playerName": "Cade Horton",
+          "slot": "P",
+          "contract": "F1",
+          "cost": 5,
+          "playerId": 690990
+        },
+        {
+          "sheetName": "B. Pfaadt",
+          "playerName": "Brandon Pfaadt",
+          "slot": "P",
+          "contract": "F3",
+          "cost": 15,
+          "playerId": 694297
+        },
+        {
+          "sheetName": "J. Misiorowski",
+          "playerName": "Jacob Misiorowski",
+          "slot": "P",
+          "contract": "F1",
+          "cost": 5,
+          "playerId": 694819
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "Jeferson Quero",
+          "playerId": 691620
+        },
+        {
+          "playerName": "Edwin Arroyo",
+          "playerId": 695490
+        },
+        {
+          "playerName": "Starlyn Caba",
+          "playerId": 806965
+        },
+        {
+          "playerName": "Emil Morales",
+          "playerId": 815896
+        },
+        {
+          "playerName": "Eli Willits",
+          "playerId": 816113
+        },
+        {
+          "playerName": "Kevin Alcántara",
+          "playerId": 682634
+        },
+        {
+          "playerName": "Edwin Florentino",
+          "playerId": 800007
+        },
+        {
+          "playerName": "Robby Snelling",
+          "playerId": 702281
+        }
+      ]
+    },
+    {
+      "teamKey": "team-b",
+      "teamName": "Team B",
+      "remainingBudget": 149,
+      "keepers": [
+        {
+          "sheetName": "F. Alvarez",
+          "playerName": "Francisco Alvarez",
+          "slot": "C",
+          "contract": "S1",
+          "cost": 10,
+          "playerId": 682626
+        },
+        {
+          "sheetName": "S. Horwitz",
+          "playerName": "Spencer Horwitz",
+          "slot": "1B",
+          "contract": "S1",
+          "cost": 3,
+          "playerId": 687462
+        },
+        {
+          "sheetName": "R. Mauricio",
+          "playerName": "Ronny Mauricio",
+          "slot": "3B",
+          "contract": "F1",
+          "cost": 5,
+          "playerId": 677595
+        },
+        {
+          "sheetName": "C.J. Abrams",
+          "playerName": "CJ Abrams",
+          "slot": "SS",
+          "contract": "X",
+          "cost": 20,
+          "playerId": 682928
+        },
+        {
+          "sheetName": "J. Merrill",
+          "playerName": "Jackson Merrill",
+          "slot": "OF",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 701538
+        },
+        {
+          "sheetName": "M. Harris",
+          "playerName": "Michael Harris II",
+          "slot": "OF",
+          "contract": "X",
+          "cost": 20,
+          "playerId": 671739
+        },
+        {
+          "sheetName": "S. Alcantara",
+          "playerName": "Sandy Alcantara",
+          "slot": "P",
+          "contract": "X",
+          "cost": 1,
+          "playerId": 645261
+        },
+        {
+          "sheetName": "M. King",
+          "playerName": "Michael King",
+          "slot": "P",
+          "contract": "X",
+          "cost": 16,
+          "playerId": 650633
+        },
+        {
+          "sheetName": "S. Strider",
+          "playerName": "Spencer Strider",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 16,
+          "playerId": 675911
+        },
+        {
+          "sheetName": "Y. Yamamoto",
+          "playerName": "Yoshinobu Yamamoto",
+          "slot": "P",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 808967
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "Kody Hoese",
+          "playerId": 682210
+        },
+        {
+          "playerName": "Jesús Made",
+          "playerId": 815908
+        },
+        {
+          "playerName": "Hedbert Perez",
+          "playerId": 691616
+        },
+        {
+          "playerName": "Esmerlyn Valdez",
+          "playerId": 699013
+        },
+        {
+          "playerName": "Moisés Ballesteros",
+          "playerId": 694208
+        },
+        {
+          "playerName": "Liam Doyle",
+          "playerId": 800016
+        }
+      ]
+    },
+    {
+      "teamKey": "team-c",
+      "teamName": "Team C",
+      "remainingBudget": 177,
+      "keepers": [
+        {
+          "sheetName": "H. Goodman",
+          "playerName": "Hunter Goodman",
+          "slot": "C",
+          "contract": "S1",
+          "cost": 1,
+          "playerId": 696100
+        },
+        {
+          "sheetName": "G. Moreno",
+          "playerName": "Gabriel Moreno",
+          "slot": "C",
+          "contract": "S1",
+          "cost": 10,
+          "playerId": 672515
+        },
+        {
+          "sheetName": "B. Turang",
+          "playerName": "Brice Turang",
+          "slot": "2B",
+          "contract": "L2",
+          "cost": 7,
+          "playerId": 668930
+        },
+        {
+          "sheetName": "T. Turner",
+          "playerName": "Trea Turner",
+          "slot": "SS",
+          "contract": "S1",
+          "cost": 34,
+          "playerId": 607208
+        },
+        {
+          "sheetName": "C. Carroll",
+          "playerName": "Corbin Carroll",
+          "slot": "OF",
+          "contract": "F3",
+          "cost": 15,
+          "playerId": 682998
+        },
+        {
+          "sheetName": "P. Crow-Armstrong",
+          "playerName": "Pete Crow-Armstrong",
+          "slot": "OF",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 691718
+        },
+        {
+          "sheetName": "J. Walker",
+          "playerName": "Jordan Walker",
+          "slot": "OF",
+          "contract": "S1",
+          "cost": 1,
+          "playerId": 691023
+        },
+        {
+          "sheetName": "M. Boyd",
+          "playerName": "Matthew Boyd",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 1,
+          "playerId": 571510
+        },
+        {
+          "sheetName": "B. Woodruff",
+          "playerName": "Brandon Woodruff",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 4,
+          "playerId": 605540
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "James Triantos",
+          "playerId": 701649
+        },
+        {
+          "playerName": "Cam Collier",
+          "playerId": 702253
+        },
+        {
+          "playerName": "Josuar Gonzalez",
+          "playerId": 829034
+        },
+        {
+          "playerName": "Luis Pena",
+          "playerId": 434524
+        },
+        {
+          "playerName": "Jefferson Rojas",
+          "playerId": 800473
+        },
+        {
+          "playerName": "Joendry Vargas",
+          "playerId": 806959
+        },
+        {
+          "playerName": "Jett Williams",
+          "playerId": 702518
+        },
+        {
+          "playerName": "Josue De Paula",
+          "playerId": 800543
+        }
+      ]
+    },
+    {
+      "teamKey": "team-d",
+      "teamName": "Team D",
+      "remainingBudget": 162,
+      "keepers": [
+        {
+          "sheetName": "M. Muncy",
+          "playerName": "Max Muncy",
+          "slot": "3B",
+          "contract": "S1",
+          "cost": 9,
+          "playerId": 571970
+        },
+        {
+          "sheetName": "N. Hoerner",
+          "playerName": "Nico Hoerner",
+          "slot": "2B",
+          "contract": "S1",
+          "cost": 17,
+          "playerId": 663538
+        },
+        {
+          "sheetName": "F. Lindor",
+          "playerName": "Francisco Lindor",
+          "slot": "SS",
+          "contract": "S1",
+          "cost": 36,
+          "playerId": 596019
+        },
+        {
+          "sheetName": "B. Marsh",
+          "playerName": "Brandon Marsh",
+          "slot": "OF",
+          "contract": "X",
+          "cost": 1,
+          "playerId": 669016
+        },
+        {
+          "sheetName": "J. Wood",
+          "playerName": "James Wood",
+          "slot": "OF",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 695578
+        },
+        {
+          "sheetName": "M. Keller",
+          "playerName": "Mitch Keller",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 7,
+          "playerId": 656605
+        },
+        {
+          "sheetName": "R. Iglesias",
+          "playerName": "Raisel Iglesias",
+          "slot": "P",
+          "contract": "X",
+          "cost": 18,
+          "playerId": 628452
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "Harry Ford",
+          "playerId": 695670
+        },
+        {
+          "playerName": "Cooper Pratt",
+          "playerId": 806198
+        },
+        {
+          "playerName": "Bubba Chandler",
+          "playerId": 696149
+        },
+        {
+          "playerName": "Nolan McLean",
+          "playerId": 690997
+        },
+        {
+          "playerName": "Cam Caminiti",
+          "playerId": 800032
+        }
+      ]
+    },
+    {
+      "teamKey": "team-e",
+      "teamName": "Team E",
+      "remainingBudget": 92,
+      "keepers": [
+        {
+          "sheetName": "G. Perdomo",
+          "playerName": "Geraldo Perdomo",
+          "slot": "SS",
+          "contract": "X",
+          "cost": 1,
+          "playerId": 672695
+        },
+        {
+          "sheetName": "J. Soto",
+          "playerName": "Juan Soto",
+          "slot": "OF",
+          "contract": "S1",
+          "cost": 47,
+          "playerId": 665742
+        },
+        {
+          "sheetName": "K. Tucker",
+          "playerName": "Kyle Tucker",
+          "slot": "OF",
+          "contract": "S1",
+          "cost": 44,
+          "playerId": 663656
+        },
+        {
+          "sheetName": "K. Schwarber",
+          "playerName": "Kyle Schwarber",
+          "slot": "UTIL",
+          "contract": "S1",
+          "cost": 23,
+          "playerId": 656941
+        },
+        {
+          "sheetName": "A. Abbott",
+          "playerName": "Andrew Abbott",
+          "slot": "P",
+          "contract": "X",
+          "cost": 4,
+          "playerId": 671096
+        },
+        {
+          "sheetName": "F. Peralta",
+          "playerName": "Freddy Peralta",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 25,
+          "playerId": 642547
+        },
+        {
+          "sheetName": "P. Skenes",
+          "playerName": "Paul Skenes",
+          "slot": "P",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 694973
+        },
+        {
+          "sheetName": "N. Cortes",
+          "playerName": "Nestor Cortes",
+          "slot": "P",
+          "contract": "LX",
+          "cost": 14,
+          "playerId": 641482
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "Chase Burns",
+          "playerId": 695505
+        },
+        {
+          "playerName": "Andrew Painter",
+          "playerId": 691725
+        },
+        {
+          "playerName": "Rhett Lowder",
+          "playerId": 695076
+        },
+        {
+          "playerName": "Aiva Arquette",
+          "playerId": 800038
+        },
+        {
+          "playerName": "Cristian Hernandez",
+          "playerId": 678707
+        },
+        {
+          "playerName": "Ethan Holliday",
+          "playerId": 815787
+        },
+        {
+          "playerName": "Seaver King",
+          "playerId": 814409
+        },
+        {
+          "playerName": "Ethan Conrad",
+          "playerId": 800042
+        }
+      ]
+    },
+    {
+      "teamKey": "team-f",
+      "teamName": "Team F",
+      "remainingBudget": 194,
+      "keepers": [
+        {
+          "sheetName": "N. Arenado",
+          "playerName": "Nolan Arenado",
+          "slot": "3B",
+          "contract": "S1",
+          "cost": 11,
+          "playerId": 571448
+        },
+        {
+          "sheetName": "S. Frelick",
+          "playerName": "Sal Frelick",
+          "slot": "OF",
+          "contract": "F3",
+          "cost": 15,
+          "playerId": 686217
+        },
+        {
+          "sheetName": "J. Chourio",
+          "playerName": "Jackson Chourio",
+          "slot": "OF",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 694192
+        },
+        {
+          "sheetName": "D. Crews",
+          "playerName": "Dylan Crews",
+          "slot": "OF",
+          "contract": "F1",
+          "cost": 5,
+          "playerId": 686611
+        },
+        {
+          "sheetName": "R. Lopez",
+          "playerName": "Reynaldo López",
+          "slot": "P",
+          "contract": "X",
+          "cost": 4,
+          "playerId": 625643
+        },
+        {
+          "sheetName": "M. McGreevy",
+          "playerName": "Michael McGreevy",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 1,
+          "playerId": 700241
+        },
+        {
+          "sheetName": "C. Sale",
+          "playerName": "Chris Sale",
+          "slot": "P",
+          "contract": "F3",
+          "cost": 15,
+          "playerId": 519242
+        },
+        {
+          "sheetName": "J. Taillon",
+          "playerName": "Jameson Taillon",
+          "slot": "P",
+          "contract": "X",
+          "cost": 1,
+          "playerId": 592791
+        },
+        {
+          "sheetName": "B. Singer",
+          "playerName": "Brady Singer",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 4,
+          "playerId": 663903
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "Joe Mack",
+          "playerId": 691788
+        },
+        {
+          "playerName": "Ryan Clifford",
+          "playerId": 691775
+        },
+        {
+          "playerName": "Roki Sasaki",
+          "playerId": 808963
+        },
+        {
+          "playerName": "Logan Henderson",
+          "playerId": 701656
+        },
+        {
+          "playerName": "Jonah Tong",
+          "playerId": 804636
+        },
+        {
+          "playerName": "Thomas White",
+          "playerId": 806258
+        }
+      ]
+    },
+    {
+      "teamKey": "team-g",
+      "teamName": "Team G",
+      "remainingBudget": 198,
+      "keepers": [
+        {
+          "sheetName": "M. Busch",
+          "playerName": "Michael Busch",
+          "slot": "1B",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 683737
+        },
+        {
+          "sheetName": "P. Smith",
+          "playerName": "Pavin Smith",
+          "slot": "CI",
+          "contract": "S1",
+          "cost": 1,
+          "note": "Spreadsheet slot is CI; current valuation fixture does not model CI directly.",
+          "playerId": 656976
+        },
+        {
+          "sheetName": "M. Winn",
+          "playerName": "Masyn Winn",
+          "slot": "SS",
+          "contract": "F2",
+          "cost": 10,
+          "playerId": 691026
+        },
+        {
+          "sheetName": "R. Acuna",
+          "playerName": "Ronald Acuna Jr.",
+          "slot": "OF",
+          "contract": "S1",
+          "cost": 31,
+          "playerId": 660670
+        },
+        {
+          "sheetName": "M. Yastrzemski",
+          "playerName": "Mike Yastrzemski",
+          "slot": "OF",
+          "contract": "X",
+          "cost": 2,
+          "playerId": 573262
+        },
+        {
+          "sheetName": "N. Lodolo",
+          "playerName": "Nick Lodolo",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 7,
+          "playerId": 666157
+        },
+        {
+          "sheetName": "J. Luzardo",
+          "playerName": "Jesus Luzardo",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 1,
+          "playerId": 666200
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "Dalton Rushing",
+          "playerId": 687221
+        },
+        {
+          "playerName": "Sal Stewart",
+          "playerId": 701398
+        },
+        {
+          "playerName": "Justin Crawford",
+          "playerId": 702222
+        },
+        {
+          "playerName": "Termarr Johnson",
+          "playerId": 702261
+        },
+        {
+          "playerName": "Steele Hall",
+          "playerId": 829162
+        },
+        {
+          "playerName": "Aidan Miller",
+          "playerId": 805795
+        },
+        {
+          "playerName": "A.J. Ewing",
+          "playerId": 805999
+        },
+        {
+          "playerName": "Tink Hence",
+          "playerId": 693311
+        }
+      ]
+    },
+    {
+      "teamKey": "team-h",
+      "teamName": "Team H",
+      "remainingBudget": 166,
+      "keepers": [
+        {
+          "sheetName": "C. Kelly",
+          "playerName": "Carson Kelly",
+          "slot": "C",
+          "contract": "S1",
+          "cost": 2,
+          "playerId": 608348
+        },
+        {
+          "sheetName": "F. Freeman",
+          "playerName": "Freddie Freeman",
+          "slot": "1B",
+          "contract": "S1",
+          "cost": 31,
+          "playerId": 518692
+        },
+        {
+          "sheetName": "E. De La Cruz",
+          "playerName": "Elly De La Cruz",
+          "slot": "SS",
+          "contract": "F3",
+          "cost": 15,
+          "playerId": 682829
+        },
+        {
+          "sheetName": "D. Swanson",
+          "playerName": "Dansby Swanson",
+          "slot": "MI",
+          "contract": "S1",
+          "cost": 8,
+          "note": "Spreadsheet slot is MI; current valuation fixture does not model MI directly.",
+          "playerId": 621020
+        },
+        {
+          "sheetName": "J. Hoo Lee",
+          "playerName": "Jung Hoo Lee",
+          "slot": "OF",
+          "contract": "F1",
+          "cost": 5,
+          "playerId": 808982
+        },
+        {
+          "sheetName": "C. Cavalli",
+          "playerName": "Cade Cavalli",
+          "slot": "P",
+          "contract": "F1",
+          "cost": 5,
+          "playerId": 676917
+        },
+        {
+          "sheetName": "L. Webb",
+          "playerName": "Logan Webb",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 28,
+          "playerId": 657277
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "Owen Caissie",
+          "playerId": 683357
+        },
+        {
+          "playerName": "Delvin Pérez",
+          "playerId": 666206
+        },
+        {
+          "playerName": "Ed Howard",
+          "playerId": 690992
+        },
+        {
+          "playerName": "Hunter Bishop",
+          "playerId": 666183
+        },
+        {
+          "playerName": "Drew Gilbert",
+          "playerId": 687551
+        },
+        {
+          "playerName": "Hudson Head",
+          "playerId": 687431
+        },
+        {
+          "playerName": "Mike Sirota",
+          "playerId": 701527
+        },
+        {
+          "playerName": "Ryan Waldschmidt",
+          "playerId": 814439
+        }
+      ]
+    },
+    {
+      "teamKey": "team-i",
+      "teamName": "Team I",
+      "remainingBudget": 104,
+      "keepers": [
+        {
+          "sheetName": "A. Ramirez",
+          "playerName": "Agustin Ramirez",
+          "slot": "C",
+          "contract": "S1",
+          "cost": 1,
+          "playerId": 682663
+        },
+        {
+          "sheetName": "M. Machado",
+          "playerName": "Manny Machado",
+          "slot": "3B",
+          "contract": "X",
+          "cost": 33,
+          "playerId": 592518
+        },
+        {
+          "sheetName": "W. Adames",
+          "playerName": "Willy Adames",
+          "slot": "SS",
+          "contract": "X",
+          "cost": 11,
+          "playerId": 642715
+        },
+        {
+          "sheetName": "V. Scott II",
+          "playerName": "Victor Scott II",
+          "slot": "OF",
+          "contract": "F1",
+          "cost": 5,
+          "playerId": 687363
+        },
+        {
+          "sheetName": "S. Suzuki",
+          "playerName": "Seiya Suzuki",
+          "slot": "OF",
+          "contract": "X",
+          "cost": 18,
+          "playerId": 673548
+        },
+        {
+          "sheetName": "G. Holmes",
+          "playerName": "Grant Holmes",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 5,
+          "playerId": 656550
+        },
+        {
+          "sheetName": "C. Sanchez",
+          "playerName": "Cristopher Sanchez",
+          "slot": "P",
+          "contract": "L2",
+          "cost": 9,
+          "playerId": 650911
+        },
+        {
+          "sheetName": "N. Pivetta",
+          "playerName": "Nick Pivetta",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 13,
+          "playerId": 601713
+        },
+        {
+          "sheetName": "R. Ray",
+          "playerName": "Robbie Ray",
+          "slot": "P",
+          "contract": "S1",
+          "cost": 15,
+          "playerId": 592662
+        },
+        {
+          "sheetName": "S. Ohtani",
+          "playerName": "Shohei Ohtani",
+          "slot": "P",
+          "contract": "L2",
+          "cost": 46,
+          "playerId": 660271
+        }
+      ],
+      "minors": [
+        {
+          "playerName": "Seth Hernandez",
+          "playerId": 800076
+        },
+        {
+          "playerName": "Konnor Griffin",
+          "playerId": 804606
+        },
+        {
+          "playerName": "Ethan Salas",
+          "playerId": 806956
+        },
+        {
+          "playerName": "Rainiel Rodriguez",
+          "playerId": 823787
+        },
+        {
+          "playerName": "Alfredo Duno",
+          "playerId": 806957
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "before-draft",
+      "label": "Before the Draft Starts",
+      "draftPicksApplied": 0
+    },
+    {
+      "id": "after-10",
+      "label": "After 10 Players Have Been Taken",
+      "draftPicksApplied": 10
+    },
+    {
+      "id": "after-50",
+      "label": "After 50 Players Have Been Taken",
+      "draftPicksApplied": 50
+    },
+    {
+      "id": "after-100",
+      "label": "After 100 Players Have Been Taken",
+      "draftPicksApplied": 100
+    },
+    {
+      "id": "after-130",
+      "label": "After 130 Players Have Been Taken",
+      "draftPicksApplied": 130
+    }
+  ]
+}
