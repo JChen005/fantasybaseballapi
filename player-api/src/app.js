@@ -21,9 +21,9 @@ app.use(express.json({ limit: '1mb' }));
 
 app.use('/v1', healthRoutes);
 app.use('/v1', licenseRoutes);
+app.use('/v1', adminRoutes);
 app.use('/v1', playerRoutes);
 app.use('/v1', streamRoutes);
-app.use('/v1', adminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

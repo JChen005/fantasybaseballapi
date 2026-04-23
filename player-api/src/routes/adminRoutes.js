@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const Player = require('../models/Player');
 const { ensureSeedData } = require('../services/seedService');
+const { createLicense } = require('../services/licenseService');
 const {
   buildTransactionEvent,
   publishTransactionEvent,
@@ -37,6 +38,30 @@ function requireAdminSecret(req, res, next) {
 
   return next();
 }
+
+router.post(
+  '/admin/licenses',
+  requireAdminSecret,
+  asyncHandler(async (req, res) => {
+    const consumerName = String(req.body?.consumerName || '').trim();
+    if (!consumerName) {
+      throw new AppError('consumerName is required', 400);
+    }
+
+    const result = await createLicense({
+      consumerName,
+      metadata: {
+        createdBy: 'admin-route',
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      apiKey: result.apiKey,
+      license: result.license,
+    });
+  })
+);
 
 router.post(
   '/admin/data-refresh',
