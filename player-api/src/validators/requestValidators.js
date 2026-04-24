@@ -207,7 +207,7 @@ function parseValuationRequest(body = {}) {
     }
 
     const status = String(entry.status || '').trim().toUpperCase();
-    if (!['DRAFTED', 'KEEPER', 'RESERVE', 'TAXI'].includes(status)) {
+    if (!['DRAFTED', 'KEEPER', 'MINOR', 'TAXI'].includes(status)) {
       throw new AppError(`draftState.excludedPlayers[${index}].status is invalid`, 400);
     }
 

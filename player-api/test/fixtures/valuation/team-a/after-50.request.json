@@ -79,7 +79,7 @@
       },
       {
         "playerId": 691620,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Jeferson Quero",
@@ -87,7 +87,7 @@
       },
       {
         "playerId": 695490,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Edwin Arroyo",
@@ -95,7 +95,7 @@
       },
       {
         "playerId": 806965,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Starlyn Caba",
@@ -103,7 +103,7 @@
       },
       {
         "playerId": 815896,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Emil Morales",
@@ -111,7 +111,7 @@
       },
       {
         "playerId": 816113,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Eli Willits",
@@ -119,7 +119,7 @@
       },
       {
         "playerId": 682634,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Kevin Alcántara",
@@ -127,7 +127,7 @@
       },
       {
         "playerId": 800007,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Edwin Florentino",
@@ -135,7 +135,7 @@
       },
       {
         "playerId": 702281,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Robby Snelling",
@@ -223,7 +223,7 @@
       },
       {
         "playerId": 682210,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Kody Hoese",
@@ -231,7 +231,7 @@
       },
       {
         "playerId": 815908,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Jesús Made",
@@ -239,7 +239,7 @@
       },
       {
         "playerId": 691616,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Hedbert Perez",
@@ -247,7 +247,7 @@
       },
       {
         "playerId": 699013,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Esmerlyn Valdez",
@@ -255,7 +255,7 @@
       },
       {
         "playerId": 694208,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Moisés Ballesteros",
@@ -263,7 +263,7 @@
       },
       {
         "playerId": 800016,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Liam Doyle",
@@ -343,7 +343,7 @@
       },
       {
         "playerId": 701649,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "James Triantos",
@@ -351,7 +351,7 @@
       },
       {
         "playerId": 702253,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Cam Collier",
@@ -359,7 +359,7 @@
       },
       {
         "playerId": 829034,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Josuar Gonzalez",
@@ -367,7 +367,7 @@
       },
       {
         "playerId": 434524,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Luis Pena",
@@ -375,7 +375,7 @@
       },
       {
         "playerId": 800473,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Jefferson Rojas",
@@ -383,7 +383,7 @@
       },
       {
         "playerId": 806959,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Joendry Vargas",
@@ -391,7 +391,7 @@
       },
       {
         "playerId": 702518,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Jett Williams",
@@ -399,7 +399,7 @@
       },
       {
         "playerId": 800543,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Josue De Paula",
@@ -463,7 +463,7 @@
       },
       {
         "playerId": 695670,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Harry Ford",
@@ -471,7 +471,7 @@
       },
       {
         "playerId": 806198,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Cooper Pratt",
@@ -479,7 +479,7 @@
       },
       {
         "playerId": 696149,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Bubba Chandler",
@@ -487,7 +487,7 @@
       },
       {
         "playerId": 690997,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Nolan McLean",
@@ -495,7 +495,7 @@
       },
       {
         "playerId": 800032,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Cam Caminiti",
@@ -567,7 +567,7 @@
       },
       {
         "playerId": 695505,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Chase Burns",
@@ -575,7 +575,7 @@
       },
       {
         "playerId": 691725,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Andrew Painter",
@@ -583,7 +583,7 @@
       },
       {
         "playerId": 695076,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Rhett Lowder",
@@ -591,7 +591,7 @@
       },
       {
         "playerId": 800038,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Aiva Arquette",
@@ -599,7 +599,7 @@
       },
       {
         "playerId": 678707,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Cristian Hernandez",
@@ -607,7 +607,7 @@
       },
       {
         "playerId": 815787,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Ethan Holliday",
@@ -615,7 +615,7 @@
       },
       {
         "playerId": 814409,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Seaver King",
@@ -623,7 +623,7 @@
       },
       {
         "playerId": 800042,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Ethan Conrad",
@@ -703,7 +703,7 @@
       },
       {
         "playerId": 691788,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Joe Mack",
@@ -711,7 +711,7 @@
       },
       {
         "playerId": 691775,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Ryan Clifford",
@@ -719,7 +719,7 @@
       },
       {
         "playerId": 808963,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Roki Sasaki",
@@ -727,7 +727,7 @@
       },
       {
         "playerId": 701656,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Logan Henderson",
@@ -735,7 +735,7 @@
       },
       {
         "playerId": 804636,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Jonah Tong",
@@ -743,7 +743,7 @@
       },
       {
         "playerId": 806258,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Thomas White",
@@ -807,7 +807,7 @@
       },
       {
         "playerId": 687221,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Dalton Rushing",
@@ -815,7 +815,7 @@
       },
       {
         "playerId": 701398,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Sal Stewart",
@@ -823,7 +823,7 @@
       },
       {
         "playerId": 702222,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Justin Crawford",
@@ -831,7 +831,7 @@
       },
       {
         "playerId": 702261,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Termarr Johnson",
@@ -839,7 +839,7 @@
       },
       {
         "playerId": 829162,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Steele Hall",
@@ -847,7 +847,7 @@
       },
       {
         "playerId": 805795,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Aidan Miller",
@@ -855,7 +855,7 @@
       },
       {
         "playerId": 805999,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "A.J. Ewing",
@@ -863,7 +863,7 @@
       },
       {
         "playerId": 693311,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Tink Hence",
@@ -927,7 +927,7 @@
       },
       {
         "playerId": 683357,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Owen Caissie",
@@ -935,7 +935,7 @@
       },
       {
         "playerId": 666206,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Delvin Pérez",
@@ -943,7 +943,7 @@
       },
       {
         "playerId": 690992,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Ed Howard",
@@ -951,7 +951,7 @@
       },
       {
         "playerId": 666183,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Hunter Bishop",
@@ -959,7 +959,7 @@
       },
       {
         "playerId": 687551,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Drew Gilbert",
@@ -967,7 +967,7 @@
       },
       {
         "playerId": 687431,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Hudson Head",
@@ -975,7 +975,7 @@
       },
       {
         "playerId": 701527,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Mike Sirota",
@@ -983,7 +983,7 @@
       },
       {
         "playerId": 814439,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Ryan Waldschmidt",
@@ -1071,7 +1071,7 @@
       },
       {
         "playerId": 800076,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Seth Hernandez",
@@ -1079,7 +1079,7 @@
       },
       {
         "playerId": 804606,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Konnor Griffin",
@@ -1087,7 +1087,7 @@
       },
       {
         "playerId": 806956,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Ethan Salas",
@@ -1095,7 +1095,7 @@
       },
       {
         "playerId": 823787,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Rainiel Rodriguez",
@@ -1103,7 +1103,7 @@
       },
       {
         "playerId": 806957,
-        "status": "RESERVE",
+        "status": "MINOR",
         "cost": 0,
         "countsAgainstBudget": false,
         "playerName": "Alfredo Duno",

@@ -45,7 +45,7 @@ Those request fixtures follow the current backend semantics:
   - `UTIL`
 - Only rows with a visible keeper contract/cost are treated as excluded pre-draft keepers.
 - Minors are included as excluded pre-draft reserve players with:
-  - `status: 'RESERVE'`
+  - `status: 'MINOR'`
   - `cost: 0`
   - `countsAgainstBudget: false`
 
