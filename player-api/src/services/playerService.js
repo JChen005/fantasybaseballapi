@@ -684,7 +684,7 @@ function getOpenApiDoc() {
     info: {
       title: 'DraftKit Player API',
       version: '0.1.0',
-      description: 'Licensed player and valuation API for DraftKit, including push updates via Server-Sent Events.',
+      description: 'Licensed player and valuation API for DraftKit.',
     },
     components: {
       securitySchemes: {
@@ -705,7 +705,6 @@ function getOpenApiDoc() {
       '/v1/players/{playerId}/transactions': { get: { summary: 'Player transactions', security: [{ ApiKeyAuth: [] }] } },
       '/v1/stats/league-averages': { get: { summary: 'League averages', security: [{ ApiKeyAuth: [] }] } },
       '/v1/teams/{teamId}/depth-chart': { get: { summary: 'Team depth chart', security: [{ ApiKeyAuth: [] }] } },
-      '/v1/stream/transactions': { get: { summary: 'SSE stream for player transactions', security: [{ ApiKeyAuth: [] }] } },
       '/v1/admin/mock-transaction': { post: { summary: 'Publish mock transaction (admin secret)' } },
       '/v1/admin/data-refresh': { post: { summary: 'Refresh seed data' } },
     },

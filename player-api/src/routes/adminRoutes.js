@@ -5,15 +5,22 @@ const mongoose = require('mongoose');
 const Player = require('../models/Player');
 const { ensureSeedData } = require('../services/seedService');
 const { createLicense } = require('../services/licenseService');
-const {
-  buildTransactionEvent,
-  publishTransactionEvent,
-} = require('../services/transactionStreamService');
 const { invalidateCatalogCache } = require('../services/catalogCache');
 const { asyncHandler } = require('../utils/asyncHandler');
 const { AppError } = require('../utils/appError');
 
 const router = express.Router();
+
+function buildTransactionResponse({ playerId, playerName, type, detail }) {
+  return {
+    eventId: crypto.randomUUID(),
+    timestamp: new Date().toISOString(),
+    playerId: String(playerId),
+    playerName: String(playerName),
+    type: String(type),
+    detail: String(detail),
+  };
+}
 
 function requireAdminSecret(req, res, next) {
   const expected = process.env.ADMIN_SECRET;
@@ -103,7 +110,7 @@ router.post(
       .toUpperCase()
       .slice(0, 40);
     const detail = String(
-      req.body?.detail || 'Mock player transaction emitted for SSE push demonstration.'
+      req.body?.detail || 'Mock player transaction created for demo refresh testing.'
     )
       .trim()
       .slice(0, 280);
@@ -124,14 +131,12 @@ router.post(
     invalidateCatalogCache('search:');
     invalidateCatalogCache('league-averages');
 
-    const eventPayload = buildTransactionEvent({
+    const eventPayload = buildTransactionResponse({
       playerId: player._id,
       playerName: player.name,
       type,
       detail,
     });
-    publishTransactionEvent(eventPayload);
-
     res.status(201).json({
       success: true,
       playerId: player._id,
