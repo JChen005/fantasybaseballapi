@@ -29,13 +29,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: player-api/package-lock.json
 
       - name: Install dependencies
+        working-directory: player-api
         run: npm ci
 
       - name: Run tests
+        working-directory: player-api
         run: npm test
 
       - name: Verify Player API app loads
+        working-directory: player-api
         run: node -e "require('./src/app'); console.log('Player API app loaded successfully')"
