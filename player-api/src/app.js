@@ -7,8 +7,10 @@ const playerRoutes = require('./routes/playerRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const { notFound } = require('./middleware/notFound');
 const { errorHandler } = require('./middleware/errorHandler');
+const { requestThrottle } = require('./middleware/requestThrottle');
 
 const app = express();
+app.set('trust proxy', true);
 
 app.use(
   cors({
@@ -21,7 +23,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use('/v1', healthRoutes);
 app.use('/v1', licenseRoutes);
 app.use('/v1', adminRoutes);
-app.use('/v1', playerRoutes);
+app.use('/v1', requestThrottle, playerRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
