@@ -18,6 +18,10 @@ describe('request throttling', () => {
     expect(getThrottleOptions()).toEqual({ maxRequests: 3, windowMs: 1000 });
   });
 
+  test('uses a high default request limit', () => {
+    expect(getThrottleOptions()).toEqual({ maxRequests: 10000, windowMs: 60000 });
+  });
+
   test('blocks requests after the configured limit', () => {
     process.env.REQUEST_THROTTLE_MAX = '1';
     process.env.REQUEST_THROTTLE_WINDOW_MS = '60000';
@@ -32,5 +36,6 @@ describe('request throttling', () => {
     expect(next).toHaveBeenCalledTimes(2);
     expect(next.mock.calls[0][0]).toBeUndefined();
     expect(next.mock.calls[1][0].status).toBe(429);
+    expect(res.setHeader).toHaveBeenCalledWith('Retry-After', expect.any(String));
   });
 });

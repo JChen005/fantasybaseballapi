@@ -2,7 +2,7 @@ const { AppError } = require('../utils/appError');
 
 const buckets = new Map();
 const DEFAULT_WINDOW_MS = 60_000;
-const DEFAULT_MAX_REQUESTS = 120;
+const DEFAULT_MAX_REQUESTS = 10_000;
 
 function parsePositiveInteger(value, fallback) {
   const parsed = Number(value);
@@ -44,6 +44,7 @@ function requestThrottle(req, res, next) {
   res.setHeader('RateLimit-Reset', String(Math.ceil((bucket.startedAt + windowMs) / 1000)));
 
   if (bucket.count > maxRequests) {
+    res.setHeader('Retry-After', String(Math.ceil((bucket.startedAt + windowMs - now) / 1000)));
     return next(new AppError('Request limit exceeded for this API key', 429));
   }
 
