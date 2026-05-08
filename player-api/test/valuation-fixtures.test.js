@@ -49,6 +49,64 @@ function getExcludedPlayerIds(query) {
   return excludedIds;
 }
 
+
+
+function getExactQueryConstraints(query) {
+  const constraints = [];
+  const stack = [query];
+
+  while (stack.length) {
+    const node = stack.pop();
+    if (!node || typeof node !== 'object') continue;
+
+    for (const [key, value] of Object.entries(node)) {
+      if (['isMlbRelevant', 'isDrafted', 'mlbLeague'].includes(key) && (typeof value === 'boolean' || typeof value === 'string')) {
+        constraints.push([key, value]);
+      } else if (value && typeof value === 'object') {
+        stack.push(value);
+      }
+    }
+  }
+
+  return constraints;
+}
+
+function matchesExactConstraints(player, constraints) {
+  return constraints.every(([key, value]) => player[key] === value);
+}
+
+function getSearchRegexes(query) {
+  const regexes = [];
+  const stack = [query];
+
+  while (stack.length) {
+    const node = stack.pop();
+    if (!node || typeof node !== 'object') continue;
+
+    for (const [key, value] of Object.entries(node)) {
+      if (['name', 'canonicalName', 'team', 'positions'].includes(key) && value?.$regex) {
+        regexes.push(new RegExp(value.$regex, value.$options || ''));
+      } else if (value && typeof value === 'object') {
+        stack.push(value);
+      }
+    }
+  }
+
+  return regexes;
+}
+
+function matchesSearchRegexes(player, regexes) {
+  if (!regexes.length) return true;
+  const searchable = [
+    player.name,
+    player.canonicalName,
+    player.team,
+    ...(Array.isArray(player.positions) ? player.positions : []),
+  ].map((value) => String(value || ''));
+
+  return regexes.some((regex) => searchable.some((value) => regex.test(value)));
+}
+
 function makeMockCatalog() {
   const stars = trackedPlayers.map((player, index) => ({
     _id: `64f00000000000000000000${index + 1}`,
@@ -96,8 +154,12 @@ function mockCatalog(catalog) {
       },
       lean() {
         const excludedIds = getExcludedPlayerIds(query);
+        const searchRegexes = getSearchRegexes(query);
+        const exactConstraints = getExactQueryConstraints(query);
         const players = catalog
           .filter((player) => !excludedIds.has(player.mlbPlayerId))
+          .filter((player) => matchesExactConstraints(player, exactConstraints))
+          .filter((player) => matchesSearchRegexes(player, searchRegexes))
           .sort((left, right) => right.baseValue - left.baseValue || left.name.localeCompare(right.name));
 
         if (!selectingPoolFields) {
@@ -247,4 +309,94 @@ test('tracked available players change value as the draft state changes', async 
       expect(playerRows[index].remainingRosterSpots).toBeLessThanOrEqual(playerRows[index - 1].remainingRosterSpots);
     }
   }
+});
+
+
+test('valuation maxBid follows auction max-bid formula for every fixture stage', async () => {
+  mockCatalog(makeMockCatalog());
+
+  for (const stageId of stageIds) {
+    const snapshot = await getValuationSnapshot(parseValuationRequest(readRequestFixture(stageId)));
+    const { remainingBudget, remainingRosterSpots, maxBid } = snapshot.valuation;
+    const expectedMaxBid = remainingRosterSpots > 0
+      ? Math.max(0, remainingBudget - (remainingRosterSpots - 1))
+      : 0;
+
+    expect(maxBid).toBe(expectedMaxBid);
+  }
+});
+
+test('player adjusted values never exceed the current max bid', async () => {
+  mockCatalog(makeMockCatalog());
+
+  const snapshot = await getValuationSnapshot(parseValuationRequest(readRequestFixture('after-100')));
+
+  for (const player of snapshot.players) {
+    expect(player.adjustedValue).toBeLessThanOrEqual(snapshot.valuation.maxBid);
+  }
+});
+
+test('excluded players are removed from valuation results', async () => {
+  mockCatalog(makeMockCatalog());
+
+  const request = readRequestFixture('after-50');
+  const excludedIds = new Set(request.draftState.excludedPlayers.map((player) => Number(player.playerId)));
+  const snapshot = await getValuationSnapshot(parseValuationRequest(request));
+
+  for (const player of snapshot.players) {
+    expect(excludedIds.has(player.mlbPlayerId)).toBe(false);
+  }
+});
+
+test('search filters valuation results by player name', async () => {
+  mockCatalog(makeMockCatalog());
+
+  const request = readRequestFixture('before-draft');
+  request.filters.search = 'Judge';
+  const snapshot = await getValuationSnapshot(parseValuationRequest(request));
+
+  expect(snapshot.players.length).toBeGreaterThan(0);
+  expect(snapshot.players.every((player) => player.name.includes('Judge'))).toBe(true);
+});
+
+
+test('valuation response respects each fixture limit setting', async () => {
+  mockCatalog(makeMockCatalog());
+  const request = readRequestFixture('before-draft');
+  request.filters.limit = 7;
+  const snapshot = await getValuationSnapshot(parseValuationRequest(request));
+  expect(snapshot.players).toHaveLength(7);
+});
+
+test('inactive players are filtered out unless includeInactive is true', async () => {
+  const catalog = makeMockCatalog();
+  catalog[0] = { ...catalog[0], isMlbRelevant: false };
+  mockCatalog(catalog);
+  const request = readRequestFixture('before-draft');
+  request.filters.search = catalog[0].name;
+  request.filters.includeInactive = false;
+  const inactiveExcluded = await getValuationSnapshot(parseValuationRequest(request));
+  request.filters.includeInactive = true;
+  const inactiveIncluded = await getValuationSnapshot(parseValuationRequest(request));
+  expect(inactiveExcluded.players).toHaveLength(0);
+  expect(inactiveIncluded.players.map((player) => player.mlbPlayerId)).toContain(catalog[0].mlbPlayerId);
+});
+
+test('league type filters the valuation player pool', async () => {
+  const catalog = makeMockCatalog();
+  catalog[0] = { ...catalog[0], mlbLeague: 'AL' };
+  catalog[1] = { ...catalog[1], mlbLeague: 'NL' };
+  mockCatalog(catalog);
+  const request = readRequestFixture('before-draft');
+  request.league.leagueType = 'AL';
+  request.filters.search = trackedPlayers[1].name;
+  const snapshot = await getValuationSnapshot(parseValuationRequest(request));
+  expect(snapshot.players.find((player) => player.mlbPlayerId === trackedPlayers[1].id)).toBeUndefined();
+});
+
+test('available players include roster fit metadata for configured slots', async () => {
+  mockCatalog(makeMockCatalog());
+  const snapshot = await getValuationSnapshot(parseValuationRequest(readRequestFixture('before-draft')));
+  const judge = snapshot.players.find((player) => player.mlbPlayerId === 592450);
+  expect(judge).toMatchObject({ rosterable: true, fillsNeed: expect.any(Boolean), eligibleSlots: expect.arrayContaining(['OF']), maxBid: snapshot.valuation.maxBid });
 });
