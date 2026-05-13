@@ -140,12 +140,14 @@ function makeMockCatalog() {
 function mockCatalog(catalog) {
   mockPlayerFind.mockImplementation((query = {}) => {
     let selectingPoolFields = false;
+    let requestedLimit = null;
 
     const chain = {
       sort() {
         return chain;
       },
-      limit() {
+      limit(value) {
+        requestedLimit = Number(value);
         return chain;
       },
       select() {
@@ -156,23 +158,34 @@ function mockCatalog(catalog) {
         const excludedIds = getExcludedPlayerIds(query);
         const searchRegexes = getSearchRegexes(query);
         const exactConstraints = getExactQueryConstraints(query);
-        const players = catalog
+
+        let players = catalog
           .filter((player) => !excludedIds.has(player.mlbPlayerId))
           .filter((player) => matchesExactConstraints(player, exactConstraints))
           .filter((player) => matchesSearchRegexes(player, searchRegexes))
-          .sort((left, right) => right.baseValue - left.baseValue || left.name.localeCompare(right.name));
+          .sort(
+            (left, right) =>
+              right.baseValue - left.baseValue ||
+              left.name.localeCompare(right.name),
+          );
+
+        if (!selectingPoolFields && Number.isFinite(requestedLimit)) {
+          players = players.slice(0, requestedLimit);
+        }
 
         if (!selectingPoolFields) {
           return Promise.resolve(players);
         }
 
-        return Promise.resolve(players.map((player) => ({
-          _id: player._id,
-          name: player.name,
-          baseValue: player.baseValue,
-          positions: player.positions,
-          eligibility: player.eligibility,
-        })));
+        return Promise.resolve(
+          players.map((player) => ({
+            _id: player._id,
+            name: player.name,
+            baseValue: player.baseValue,
+            positions: player.positions,
+            eligibility: player.eligibility,
+          })),
+        );
       },
     };
 
