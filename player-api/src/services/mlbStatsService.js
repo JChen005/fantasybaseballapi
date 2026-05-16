@@ -14,8 +14,7 @@ const {
 const Player = require('../models/Player');
 const {
   buildDepthIndex,
-  buildDepthRoleFromEntry,
-  buildEligibility,
+  buildPositions,
   isStarterPremiumSlot,
   normalizeDepthChart,
 } = require('./depthChartService');
@@ -32,18 +31,6 @@ function buildTransaction(player, season) {
     type: 'Roster Sync',
     detail: `${player.name} synced from MLB Stats API active roster, 40-man roster, and depth chart data.`,
   }];
-}
-
-function normalizeRosterStatus(value, isActiveRoster) {
-  const normalized = normalizeWhitespace(value).toUpperCase();
-
-  if (isActiveRoster) return 'ACTIVE';
-  if (!normalized) return 'UNKNOWN';
-  if (normalized.includes('INJURED') || normalized.includes('IL')) return 'IL';
-  if (normalized.includes('REHAB')) return 'REHAB';
-  if (normalized.includes('OPTION')) return 'OPTIONED';
-  if (normalized.includes('MINOR')) return 'MINORS';
-  return normalized.replace(/\s+/g, '_');
 }
 
 function getStatSplits(person, { group, type }) {
@@ -295,7 +282,6 @@ async function fetchMlbRosterPlayers({ season }) {
       if (!entry?.person?.id) continue;
       rosterEntriesByPlayerId.set(entry.person.id, {
         entry,
-        sourceRosterScope: 'FORTY_MAN',
       });
     }
 
@@ -303,25 +289,23 @@ async function fetchMlbRosterPlayers({ season }) {
       if (!entry?.person?.id) continue;
       rosterEntriesByPlayerId.set(entry.person.id, {
         entry,
-        sourceRosterScope: 'ACTIVE',
       });
     }
 
-    for (const { entry, sourceRosterScope } of rosterEntriesByPlayerId.values()) {
+    for (const { entry } of rosterEntriesByPlayerId.values()) {
       rosterEntries.push({
         entry,
         teamId,
         teamCode,
         depthInfo: snapshot.depthIndex.get(entry.person.id) || null,
         isActiveRoster: snapshot.activeRosterIds.has(entry.person.id),
-        sourceRosterScope,
       });
     }
   }
 
   const peopleById = await fetchPeopleStats(rosterEntries.map(({ entry }) => entry.person.id));
 
-  return rosterEntries.map(({ entry, teamId, teamCode, depthInfo, isActiveRoster, sourceRosterScope }) =>
+  return rosterEntries.map(({ entry, teamId, teamCode, depthInfo, isActiveRoster }) =>
     buildPlayerDocumentFromPerson({
       person: peopleById.get(entry.person.id) || entry.person,
       teamCode,
@@ -330,8 +314,6 @@ async function fetchMlbRosterPlayers({ season }) {
       rosterEntry: entry,
       season,
       isActiveRoster,
-      sourceRosterScope,
-      dataSources: ['mlbStatsApi', 'mlbDepthChart'],
     })
   );
 }
@@ -344,8 +326,6 @@ function buildPlayerDocumentFromPerson({
   rosterEntry,
   season,
   isActiveRoster,
-  sourceRosterScope,
-  dataSources,
 }) {
   const positionInputs = [
     person?.primaryPosition?.abbreviation,
@@ -358,23 +338,18 @@ function buildPlayerDocumentFromPerson({
     rosterEntry?.position?.type,
     ...(depthInfo?.positions || []),
   ];
-  const positions = buildEligibility(positionInputs);
+  const positions = buildPositions(positionInputs);
   const playerStats = buildPlayerStats(person, season);
   const injuryStatus = normalizeWhitespace(depthInfo?.status || rosterEntry?.status?.description || 'HEALTHY') || 'HEALTHY';
-  const rosterStatus = normalizeRosterStatus(rosterEntry?.status?.description || depthInfo?.status, isActiveRoster);
   const playerName = normalizeWhitespace(person.fullName);
 
   return {
     name: playerName,
-    canonicalName: playerName,
     mlbPlayerId: person.id,
-    mlbTeamId: teamId,
     team: teamCode,
     mlbLeague: toLeague(teamCode),
     positions,
-    eligibility: positions,
     injuryStatus,
-    depthRole: depthInfo?.depthRole || buildDepthRoleFromEntry(rosterEntry || { position: person.primaryPosition || {} }),
     ...playerStats,
     baseValue: computeBaseValue(playerStats.statsLastYear, {
       depthRank: Number.isInteger(depthInfo?.depthRank) ? depthInfo.depthRank : null,
@@ -384,10 +359,7 @@ function buildPlayerDocumentFromPerson({
     isCustom: false,
     isDrafted: false,
     isMlbRelevant: true,
-    rosterStatus,
-    sourceRosterScope,
     headshotUrl: buildHeadshotUrl(person.id),
-    dataSources,
     isActiveRoster,
     lastSeenInSyncAt: new Date(),
     lastSyncedAt: new Date(),
@@ -419,11 +391,6 @@ async function buildSearchPlayerDocument({ person, teamInfo, snapshotsByTeamId, 
   const fortyManEntry = snapshot.fortyManRoster.find((entry) => entry?.person?.id === person.id) || null;
   const rosterEntry = activeEntry || fortyManEntry || null;
   const isActiveRoster = snapshot.activeRosterIds.has(person.id);
-  const sourceRosterScope = isActiveRoster
-    ? 'ACTIVE'
-    : snapshot.fortyManRosterIds.has(person.id)
-      ? 'FORTY_MAN'
-      : 'SEARCH';
 
   return buildPlayerDocumentFromPerson({
     person,
@@ -433,8 +400,6 @@ async function buildSearchPlayerDocument({ person, teamInfo, snapshotsByTeamId, 
     rosterEntry,
     season,
     isActiveRoster,
-    sourceRosterScope,
-    dataSources: ['mlbStatsApi', 'mlbDepthChart', 'mlbSearch'],
   });
 }
 
@@ -521,7 +486,7 @@ function dedupePlayers(players, season) {
   }
 
   return uniquePlayers.sort(
-    (a, b) => b.baseValue - a.baseValue || a.canonicalName.localeCompare(b.canonicalName) || a.name.localeCompare(b.name)
+    (a, b) => b.baseValue - a.baseValue || a.name.localeCompare(b.name)
   );
 }
 

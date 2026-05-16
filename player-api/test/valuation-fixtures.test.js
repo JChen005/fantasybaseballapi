@@ -84,7 +84,7 @@ function getSearchRegexes(query) {
     if (!node || typeof node !== 'object') continue;
 
     for (const [key, value] of Object.entries(node)) {
-      if (['name', 'canonicalName', 'team', 'positions'].includes(key) && value?.$regex) {
+      if (['name', 'team', 'positions'].includes(key) && value?.$regex) {
         regexes.push(new RegExp(value.$regex, value.$options || ''));
       } else if (value && typeof value === 'object') {
         stack.push(value);
@@ -99,7 +99,6 @@ function matchesSearchRegexes(player, regexes) {
   if (!regexes.length) return true;
   const searchable = [
     player.name,
-    player.canonicalName,
     player.team,
     ...(Array.isArray(player.positions) ? player.positions : []),
   ].map((value) => String(value || ''));
@@ -112,10 +111,8 @@ function makeMockCatalog() {
     _id: `64f00000000000000000000${index + 1}`,
     mlbPlayerId: player.id,
     name: player.name,
-    canonicalName: player.name,
     baseValue: player.baseValue,
     positions: player.positions,
-    eligibility: player.positions,
     mlbLeague: 'MIXED',
     isDrafted: false,
     isMlbRelevant: true,
@@ -125,10 +122,8 @@ function makeMockCatalog() {
     _id: `64f0000000000000000${String(index + 1 + stars.length).padStart(5, '0')}`,
     mlbPlayerId: 910000 + index,
     name: `Fixture Player ${String(index + 1).padStart(3, '0')}`,
-    canonicalName: `Fixture Player ${String(index + 1).padStart(3, '0')}`,
     baseValue: Math.max(1, 110 - index * 0.35),
     positions: index % 4 === 0 ? ['P'] : ['OF', 'UTIL'],
-    eligibility: index % 4 === 0 ? ['P'] : ['OF', 'UTIL'],
     mlbLeague: 'MIXED',
     isDrafted: false,
     isMlbRelevant: true,
@@ -183,7 +178,6 @@ function mockCatalog(catalog) {
             name: player.name,
             baseValue: player.baseValue,
             positions: player.positions,
-            eligibility: player.eligibility,
           })),
         );
       },

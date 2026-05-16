@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Player = require('../models/Player');
+const mongoose = require("mongoose");
+const Player = require("../models/Player");
 
 // The valuation endpoint is intentionally stateless: the webapp sends the draft
 // context on each request and this service computes a fresh snapshot from that.
@@ -46,7 +46,10 @@ function buildExcludedPlayerFilter(excludedPlayers = []) {
   const mlbPlayerIds = [];
 
   for (const entry of excludedPlayers) {
-    if (typeof entry.playerId === 'string' && mongoose.isValidObjectId(entry.playerId)) {
+    if (
+      typeof entry.playerId === "string" &&
+      mongoose.isValidObjectId(entry.playerId)
+    ) {
       objectIds.push(new mongoose.Types.ObjectId(entry.playerId));
       continue;
     }
@@ -75,14 +78,11 @@ function buildExcludedPlayerFilter(excludedPlayers = []) {
 function withSearchFilter(escapedQuery) {
   if (!escapedQuery) return {};
 
-  // Search is intentionally broad because these routes power UI typeaheads.
-  // We match across human-friendly fields instead of relying on exact ids.
   return {
     $or: [
-      { name: { $regex: escapedQuery, $options: 'i' } },
-      { canonicalName: { $regex: escapedQuery, $options: 'i' } },
-      { team: { $regex: escapedQuery, $options: 'i' } },
-      { positions: { $regex: escapedQuery, $options: 'i' } },
+      { name: { $regex: escapedQuery, $options: "i" } },
+      { team: { $regex: escapedQuery, $options: "i" } },
+      { positions: { $regex: escapedQuery, $options: "i" } },
     ],
   };
 }
@@ -90,7 +90,10 @@ function withSearchFilter(escapedQuery) {
 function getRosterShape(rosterSlots = {}) {
   // Bench spots count toward total roster size, but not toward the starter pool
   // used for replacement level and auction-pool sizing.
-  const totalSlots = Object.values(rosterSlots).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const totalSlots = Object.values(rosterSlots).reduce(
+    (sum, value) => sum + (Number(value) || 0),
+    0,
+  );
   const benchSlots = Number(rosterSlots.BN) || 0;
   const starterSlots = Math.max(0, totalSlots - benchSlots);
 
@@ -107,18 +110,24 @@ function getOpenSlots(rosterSlots = {}, filledSlots = {}) {
   // This is team-specific draft context. A slot is "open" only relative to the
   // selected team's current roster state, not the whole league.
   for (const [slot, total] of Object.entries(rosterSlots)) {
-    openSlots[slot] = Math.max(0, (Number(total) || 0) - (Number(filledSlots[slot]) || 0));
+    openSlots[slot] = Math.max(
+      0,
+      (Number(total) || 0) - (Number(filledSlots[slot]) || 0),
+    );
   }
 
   return openSlots;
 }
 
 function normalizePositionToken(position) {
-  const normalized = String(position || '').trim().toUpperCase();
-  if (normalized === '1B' || normalized === 'B1') return '1B';
-  if (normalized === '2B' || normalized === 'B2') return '2B';
-  if (normalized === '3B' || normalized === 'B3') return '3B';
-  if (normalized === 'SP' || normalized === 'RP' || normalized === 'P') return 'P';
+  const normalized = String(position || "")
+    .trim()
+    .toUpperCase();
+  if (normalized === "1B" || normalized === "B1") return "1B";
+  if (normalized === "2B" || normalized === "B2") return "2B";
+  if (normalized === "3B" || normalized === "B3") return "3B";
+  if (normalized === "SP" || normalized === "RP" || normalized === "P")
+    return "P";
   return normalized;
 }
 
@@ -133,22 +142,42 @@ function getEligibleRosterSlots(player) {
   const normalizedPositions = new Set(
     rawPositions
       .map(normalizePositionToken)
-      .filter((position) => ['C', '1B', '2B', '3B', 'SS', 'OF', 'P', 'UTIL', 'TWOWAYPLAYER'].includes(position))
+      .filter((position) =>
+        [
+          "C",
+          "1B",
+          "2B",
+          "3B",
+          "SS",
+          "OF",
+          "P",
+          "UTIL",
+          "TWOWAYPLAYER",
+        ].includes(position),
+      ),
   );
 
   const eligibleSlots = new Set();
-  if (normalizedPositions.has('C')) eligibleSlots.add('C');
-  if (normalizedPositions.has('1B')) eligibleSlots.add('1B');
-  if (normalizedPositions.has('2B')) eligibleSlots.add('2B');
-  if (normalizedPositions.has('3B')) eligibleSlots.add('3B');
-  if (normalizedPositions.has('SS')) eligibleSlots.add('SS');
-  if (normalizedPositions.has('OF')) eligibleSlots.add('OF');
-  if (normalizedPositions.has('P') || normalizedPositions.has('TWOWAYPLAYER')) eligibleSlots.add('P');
+  if (normalizedPositions.has("C")) eligibleSlots.add("C");
+  if (normalizedPositions.has("1B")) eligibleSlots.add("1B");
+  if (normalizedPositions.has("2B")) eligibleSlots.add("2B");
+  if (normalizedPositions.has("3B")) eligibleSlots.add("3B");
+  if (normalizedPositions.has("SS")) eligibleSlots.add("SS");
+  if (normalizedPositions.has("OF")) eligibleSlots.add("OF");
+  if (normalizedPositions.has("P") || normalizedPositions.has("TWOWAYPLAYER"))
+    eligibleSlots.add("P");
 
-  const isHitterEligible = [...normalizedPositions].some((position) => ['C', '1B', '2B', '3B', 'SS', 'OF'].includes(position));
-  const isPitcherOnly = eligibleSlots.has('P') && !isHitterEligible;
-  if (!isPitcherOnly && (isHitterEligible || normalizedPositions.has('TWOWAYPLAYER') || normalizedPositions.has('UTIL'))) {
-    eligibleSlots.add('UTIL');
+  const isHitterEligible = [...normalizedPositions].some((position) =>
+    ["C", "1B", "2B", "3B", "SS", "OF"].includes(position),
+  );
+  const isPitcherOnly = eligibleSlots.has("P") && !isHitterEligible;
+  if (
+    !isPitcherOnly &&
+    (isHitterEligible ||
+      normalizedPositions.has("TWOWAYPLAYER") ||
+      normalizedPositions.has("UTIL"))
+  ) {
+    eligibleSlots.add("UTIL");
   }
 
   return [...eligibleSlots];
@@ -164,7 +193,9 @@ function getTeamFit(player, openSlots, hasFilledSlots) {
   }
 
   const eligibleSlots = getEligibleRosterSlots(player);
-  const fillsNeed = eligibleSlots.some((slot) => (Number(openSlots[slot]) || 0) > 0);
+  const fillsNeed = eligibleSlots.some(
+    (slot) => (Number(openSlots[slot]) || 0) > 0,
+  );
 
   // Team fit is deliberately simple: we only distinguish between players who
   // can help fill an open slot right now and players who would be surplus.
@@ -179,7 +210,9 @@ function buildRoleScarcityBySlot(players, league, usableValueThreshold) {
   const rosterSlots = league?.rosterSlots || {};
   const teamCount = Math.max(1, Number(league?.teamCount) || 1);
   const relevantSlots = Object.entries(rosterSlots)
-    .filter(([slot, count]) => slot !== 'BN' && slot !== 'UTIL' && Number(count) > 0)
+    .filter(
+      ([slot, count]) => slot !== "BN" && slot !== "UTIL" && Number(count) > 0,
+    )
     .map(([slot]) => slot);
   const minimumBaseValue = Math.max(0, Number(usableValueThreshold) || 0);
 
@@ -190,27 +223,31 @@ function buildRoleScarcityBySlot(players, league, usableValueThreshold) {
       const demand = teamCount * Math.max(0, Number(rosterSlots[slot]) || 0);
       const supply = Math.max(
         1,
-        players
-          .filter((player) =>
-            Number(player?.baseValue || 0) >= minimumBaseValue
-            && getEligibleRosterSlots(player).includes(slot)
-          )
-          .length
+        players.filter(
+          (player) =>
+            Number(player?.baseValue || 0) >= minimumBaseValue &&
+            getEligibleRosterSlots(player).includes(slot),
+        ).length,
       );
       const scarcityRatio = demand / supply;
-      const rawMultiplier = 1 + ((scarcityRatio - 1) * ROLE_SCARCITY_WEIGHT);
+      const rawMultiplier = 1 + (scarcityRatio - 1) * ROLE_SCARCITY_WEIGHT;
       const multiplier = Math.min(
         ROLE_SCARCITY_MAX_MULTIPLIER,
-        Math.max(ROLE_SCARCITY_MIN_MULTIPLIER, Number(rawMultiplier.toFixed(3)))
+        Math.max(
+          ROLE_SCARCITY_MIN_MULTIPLIER,
+          Number(rawMultiplier.toFixed(3)),
+        ),
       );
 
       return [slot, multiplier];
-    })
+    }),
   );
 }
 
 function getRoleScarcityDetails(player, roleScarcityBySlot = {}) {
-  const eligibleSlots = getEligibleRosterSlots(player).filter((slot) => slot in roleScarcityBySlot);
+  const eligibleSlots = getEligibleRosterSlots(player).filter(
+    (slot) => slot in roleScarcityBySlot,
+  );
 
   if (!eligibleSlots.length) {
     return 1;
@@ -241,7 +278,7 @@ function combineFitMultipliers({ roleScarcityMultiplier, teamFitMultiplier }) {
 
   return Math.min(
     COMBINED_FIT_MAX_MULTIPLIER,
-    Math.max(COMBINED_FIT_MIN_MULTIPLIER, Number(combined.toFixed(3)))
+    Math.max(COMBINED_FIT_MIN_MULTIPLIER, Number(combined.toFixed(3))),
   );
 }
 
@@ -254,9 +291,14 @@ function getReplacementLevel(players, slotCount) {
 function buildRankedPool(players, poolSize) {
   // Replacement level is defined by rank inside a synthetic roster-sized pool.
   // That line becomes the baseline for later market/auction calculations.
-  const sortedPlayers = [...players].sort((left, right) => right.baseValue - left.baseValue || left.name.localeCompare(right.name));
+  const sortedPlayers = [...players].sort(
+    (left, right) =>
+      right.baseValue - left.baseValue || left.name.localeCompare(right.name),
+  );
   const replacementLevel = getReplacementLevel(sortedPlayers, poolSize);
-  const rosterablePlayers = new Set(sortedPlayers.slice(0, poolSize).map((player) => String(player._id)));
+  const rosterablePlayers = new Set(
+    sortedPlayers.slice(0, poolSize).map((player) => String(player._id)),
+  );
 
   return {
     poolSize,
@@ -269,10 +311,17 @@ function buildAuctionPool(players, league) {
   // Auction pool answers: "which players are realistically worth draft dollars
   // in this league format?" It is narrower than the overall player catalog.
   const rosterShape = getRosterShape(league.rosterSlots);
-  const dollarablePoolShare = Number.isFinite(Number(league.dollarablePoolShare))
+  const dollarablePoolShare = Number.isFinite(
+    Number(league.dollarablePoolShare),
+  )
     ? Number(league.dollarablePoolShare)
     : DEFAULT_DOLLARABLE_POOL_SHARE;
-  const poolSize = Math.max(1, Math.round(rosterShape.starterSlots * league.teamCount * dollarablePoolShare));
+  const poolSize = Math.max(
+    1,
+    Math.round(
+      rosterShape.starterSlots * league.teamCount * dollarablePoolShare,
+    ),
+  );
 
   return {
     rosterShape,
@@ -288,9 +337,12 @@ function buildMarketPool(players, league) {
     Number.isFinite(Number(league.dollarablePoolShare))
       ? Number(league.dollarablePoolShare)
       : DEFAULT_DOLLARABLE_POOL_SHARE,
-    MIN_MARKET_POOL_SHARE
+    MIN_MARKET_POOL_SHARE,
   );
-  const poolSize = Math.max(1, Math.round(rosterShape.starterSlots * league.teamCount * marketPoolShare));
+  const poolSize = Math.max(
+    1,
+    Math.round(rosterShape.starterSlots * league.teamCount * marketPoolShare),
+  );
 
   return buildRankedPool(players, poolSize);
 }
@@ -312,7 +364,10 @@ function computeAuctionBaseValue(player, auctionPool) {
   return {
     rosterable: true,
     // Base auction value is the amount of value above the replacement line.
-    auctionBaseValue: Math.max(0, Number((Number(player.baseValue || 0) - replacementLevel).toFixed(2))),
+    auctionBaseValue: Math.max(
+      0,
+      Number((Number(player.baseValue || 0) - replacementLevel).toFixed(2)),
+    ),
     replacementLevel,
   };
 }
@@ -339,7 +394,8 @@ function computeBelowReplacementValue({
 }) {
   const safeReplacementLevel = Number(marketReplacementLevel) || 0;
   const safeBaseValue = Math.max(0, Number(player?.baseValue) || 0);
-  const maxTailSpread = BELOW_REPLACEMENT_VALUE_CEILING - BELOW_REPLACEMENT_VALUE_FLOOR;
+  const maxTailSpread =
+    BELOW_REPLACEMENT_VALUE_CEILING - BELOW_REPLACEMENT_VALUE_FLOOR;
 
   if (maxBid <= 0) {
     return 0;
@@ -352,22 +408,34 @@ function computeBelowReplacementValue({
   // Below-replacement players still get a small non-zero value so the tail of
   // the pool is usable in the UI and feels like a real auction list.
   const replacementRatio = Math.min(1, safeBaseValue / safeReplacementLevel);
-  const rawTailValue = BELOW_REPLACEMENT_VALUE_FLOOR + (replacementRatio * maxTailSpread * teamFitMultiplier);
+  const rawTailValue =
+    BELOW_REPLACEMENT_VALUE_FLOOR +
+    replacementRatio * maxTailSpread * teamFitMultiplier;
 
   return Math.min(
     BELOW_REPLACEMENT_VALUE_CEILING,
     maxBid,
-    Math.max(BELOW_REPLACEMENT_VALUE_FLOOR, Math.round(rawTailValue))
+    Math.max(BELOW_REPLACEMENT_VALUE_FLOOR, Math.round(rawTailValue)),
   );
 }
 
-function getBudgetAdjustmentFactor({ remainingBudget, remainingRosterSpots, budget, totalSlots }) {
+function getBudgetAdjustmentFactor({
+  remainingBudget,
+  remainingRosterSpots,
+  budget,
+  totalSlots,
+}) {
   const safeRemainingRosterSpots = Number(remainingRosterSpots) || 0;
   const safeTotalSlots = Number(totalSlots) || 0;
   const safeRemainingBudget = Number(remainingBudget) || 0;
   const safeBudget = Number(budget) || 0;
 
-  if (safeRemainingRosterSpots <= 0 || safeTotalSlots <= 0 || safeRemainingBudget <= 0 || safeBudget <= 0) {
+  if (
+    safeRemainingRosterSpots <= 0 ||
+    safeTotalSlots <= 0 ||
+    safeRemainingBudget <= 0 ||
+    safeBudget <= 0
+  ) {
     return 0;
   }
 
@@ -387,29 +455,47 @@ function buildMarketDetailsById(players, marketPool) {
       const playerId = String(player._id);
       const rosterable = marketPool.rosterablePlayers.has(playerId);
       const marketAuctionBaseValue = rosterable
-        ? Math.max(0, Number((Number(player.baseValue || 0) - marketPool.replacementLevel).toFixed(2)))
+        ? Math.max(
+            0,
+            Number(
+              (
+                Number(player.baseValue || 0) - marketPool.replacementLevel
+              ).toFixed(2),
+            ),
+          )
         : 0;
 
-      return [playerId, {
-        rosterable,
-        // Market auction base value uses the wider market pool replacement line,
-        // not the tighter auction pool replacement line.
-        marketAuctionBaseValue,
-      }];
-    })
+      return [
+        playerId,
+        {
+          rosterable,
+          // Market auction base value uses the wider market pool replacement line,
+          // not the tighter auction pool replacement line.
+          marketAuctionBaseValue,
+        },
+      ];
+    }),
   );
 }
 
 function computeRosterBudgetState({ draftState, league, rosterShape }) {
   // Budget state follows the requesting team's exclusions, not filledSlots alone.
   // That mirrors how the webapp tracks keepers/minors/drafted players today.
-  const budgetEntries = draftState.excludedPlayers.filter((entry) => entry.countsAgainstBudget);
+  const budgetEntries = draftState.excludedPlayers.filter(
+    (entry) => entry.countsAgainstBudget,
+  );
   const spentBudget = budgetEntries.reduce((sum, entry) => sum + entry.cost, 0);
   const remainingBudget = Math.max(0, league.budget - spentBudget);
   const filledRosterSpots = budgetEntries.length;
-  const remainingRosterSpots = Math.max(0, rosterShape.totalSlots - filledRosterSpots);
+  const remainingRosterSpots = Math.max(
+    0,
+    rosterShape.totalSlots - filledRosterSpots,
+  );
   const surplusBudget = Math.max(0, remainingBudget - remainingRosterSpots);
-  const maxBid = remainingRosterSpots > 0 ? Math.max(0, remainingBudget - (remainingRosterSpots - 1)) : 0;
+  const maxBid =
+    remainingRosterSpots > 0
+      ? Math.max(0, remainingBudget - (remainingRosterSpots - 1))
+      : 0;
 
   return {
     remainingBudget,
@@ -438,7 +524,10 @@ function buildValuationRow({
     rosterable: false,
   };
   const teamFit = getTeamFit(player, openSlots, hasFilledSlots);
-  const roleScarcityMultiplier = getRoleScarcityDetails(player, roleScarcityBySlot);
+  const roleScarcityMultiplier = getRoleScarcityDetails(
+    player,
+    roleScarcityBySlot,
+  );
   const combinedFitMultiplier = combineFitMultipliers({
     roleScarcityMultiplier,
     teamFitMultiplier: teamFit.teamFitMultiplier,
@@ -454,10 +543,17 @@ function buildValuationRow({
     if (marketDetails.rosterable) {
       marketValue = ABOVE_REPLACEMENT_VALUE_FLOOR;
       const marketWeight = toMarketWeight(marketDetails.marketAuctionBaseValue);
-      if (marketWeight > 0 && maxRemainingMarketAuctionWeight > 0 && marketEliteValueTarget > 0) {
+      if (
+        marketWeight > 0 &&
+        maxRemainingMarketAuctionWeight > 0 &&
+        marketEliteValueTarget > 0
+      ) {
         marketValue = Math.max(
           ABOVE_REPLACEMENT_VALUE_FLOOR,
-          Math.round((marketWeight / maxRemainingMarketAuctionWeight) * marketEliteValueTarget)
+          Math.round(
+            (marketWeight / maxRemainingMarketAuctionWeight) *
+              marketEliteValueTarget,
+          ),
         );
       }
     }
@@ -466,7 +562,9 @@ function buildValuationRow({
       // It starts from market price, then applies draft-state and fit context.
       adjustedValue = Math.max(
         ABOVE_REPLACEMENT_VALUE_FLOOR,
-        Math.round(marketValue * budgetAdjustmentFactor * combinedFitMultiplier)
+        Math.round(
+          marketValue * budgetAdjustmentFactor * combinedFitMultiplier,
+        ),
       );
     }
     adjustedValue = Math.min(adjustedValue, maxBid);
@@ -491,38 +589,30 @@ function buildValuationRow({
   };
 }
 
-async function getValuationSnapshot({
-  league,
-  filters,
-  draftState,
-}) {
-  // We run two related queries:
-  // 1. a limited result set to return to the caller
-  // 2. a full available-player pool for league-wide valuation math
-  // The response list can be filtered/searched, but pricing still needs the
-  // broader market context from the entire remaining player pool.
+async function getValuationSnapshot({ league, filters, draftState }) {
+  // filter player pool for undrafted players in given league type
   const poolQueryBase = {
     ...withLeagueFilter(league.leagueType),
     ...withActiveFilter(filters.includeInactive),
     isDrafted: false,
   };
 
+  // remove excluded players (drafted, keeper, etc)
   const excludedFilter = buildExcludedPlayerFilter(draftState.excludedPlayers);
   const poolQuery = excludedFilter
     ? { $and: [poolQueryBase, excludedFilter] }
     : poolQueryBase;
+
   const playerListQuery = filters.escapedSearch
     ? {
-        $and: [
-          poolQuery,
-          withSearchFilter(filters.escapedSearch),
-        ],
+        $and: [poolQuery, withSearchFilter(filters.escapedSearch)],
       }
     : poolQuery;
 
+  // UI player pool, full player pool
   const [players, poolPlayers] = await Promise.all([
     Player.find(playerListQuery)
-      .sort({ baseValue: -1, canonicalName: 1, name: 1 })
+      .sort({ baseValue: -1, name: 1 })
       .limit(filters.limit)
       .lean(),
     Player.find(poolQuery)
@@ -531,13 +621,11 @@ async function getValuationSnapshot({
         name: 1,
         baseValue: 1,
         positions: 1,
-        eligibility: 1,
       })
       .lean(),
   ]);
 
-  // eligibleRosterSlots is derived once up front and then reused by several
-  // later steps (team fit, scarcity, and the returned response fields).
+  // determine eligible slots for players
   const poolPlayersWithEligibleSlots = poolPlayers.map((player) => ({
     ...player,
     eligibleRosterSlots: getEligibleRosterSlots(player),
@@ -547,40 +635,63 @@ async function getValuationSnapshot({
     eligibleRosterSlots: getEligibleRosterSlots(player),
   }));
 
+  // narrower pool of top X players
   const auctionPool = buildAuctionPool(poolPlayersWithEligibleSlots, league);
+
+  // broader pool of top Y players for Y > X
   const marketPool = buildMarketPool(poolPlayersWithEligibleSlots, league);
+
   const auctionDetailsById = new Map(
     poolPlayersWithEligibleSlots.map((player) => {
       const details = computeAuctionBaseValue(player, auctionPool);
       return [String(player._id), details];
-    })
+    }),
   );
-  const marketDetailsById = buildMarketDetailsById(poolPlayersWithEligibleSlots, marketPool);
+  const marketDetailsById = buildMarketDetailsById(
+    poolPlayersWithEligibleSlots,
+    marketPool,
+  );
 
+  // find player with highest market value
   const maxRemainingMarketAuctionWeight = Number(
     poolPlayers
       .reduce((max, player) => {
-        const marketAuctionBaseValue = marketDetailsById.get(String(player._id))?.marketAuctionBaseValue || 0;
+        const marketAuctionBaseValue =
+          marketDetailsById.get(String(player._id))?.marketAuctionBaseValue ||
+          0;
         return Math.max(max, toMarketWeight(marketAuctionBaseValue));
       }, 0)
-      .toFixed(2)
+      .toFixed(2),
   );
+
+  // Get team budget state
+  // If team has extra money relative to open roster slots, values rise
+  // If money is tight, player valuations fall
   const rosterShape = auctionPool.rosterShape;
-  const rosterBudgetState = computeRosterBudgetState({ draftState, league, rosterShape });
+  const rosterBudgetState = computeRosterBudgetState({
+    draftState,
+    league,
+    rosterShape,
+  });
   const budgetAdjustmentFactor = getBudgetAdjustmentFactor({
     remainingBudget: rosterBudgetState.remainingBudget,
     remainingRosterSpots: rosterBudgetState.remainingRosterSpots,
     budget: league.budget,
     totalSlots: rosterShape.totalSlots,
   });
+
   const openSlots = getOpenSlots(league.rosterSlots, draftState.filledSlots);
   const hasFilledSlots = Object.keys(draftState.filledSlots).length > 0;
+
+  // 20% of budget should be allocated to top player
   const marketEliteValueTarget = getMarketEliteValueTarget(league.budget);
-  const roleScarcityUsableValueThreshold = marketEliteValueTarget * ROLE_SCARCITY_USABLE_VALUE_SHARE;
+  // scarce players determined to be at least 30% of top player value
+  const roleScarcityUsableValueThreshold =
+    marketEliteValueTarget * ROLE_SCARCITY_USABLE_VALUE_SHARE;
   const roleScarcityBySlot = buildRoleScarcityBySlot(
     poolPlayersWithEligibleSlots,
     league,
-    roleScarcityUsableValueThreshold
+    roleScarcityUsableValueThreshold,
   );
 
   // The response mirrors what the webapp needs:
@@ -597,19 +708,21 @@ async function getValuationSnapshot({
       marketEliteValueTarget,
       budgetAdjustmentFactor,
     },
-    players: playersWithEligibleSlots.map((player) => buildValuationRow({
-      player,
-      auctionDetailsById,
-      marketDetailsById,
-      marketPool,
-      maxRemainingMarketAuctionWeight,
-      marketEliteValueTarget,
-      budgetAdjustmentFactor,
-      maxBid: rosterBudgetState.maxBid,
-      openSlots,
-      hasFilledSlots,
-      roleScarcityBySlot,
-    })),
+    players: playersWithEligibleSlots.map((player) =>
+      buildValuationRow({
+        player,
+        auctionDetailsById,
+        marketDetailsById,
+        marketPool,
+        maxRemainingMarketAuctionWeight,
+        marketEliteValueTarget,
+        budgetAdjustmentFactor,
+        maxBid: rosterBudgetState.maxBid,
+        openSlots,
+        hasFilledSlots,
+        roleScarcityBySlot,
+      }),
+    ),
   };
 }
 

@@ -10,6 +10,34 @@ const { invalidateCatalogCache } = require('./catalogCache');
 const { getValuationSnapshot } = require('./valuationService');
 const { getOpenApiDoc } = require('../docs/openApiDoc');
 
+function serializePlayer(player) {
+  if (!player || typeof player !== 'object') {
+    return player;
+  }
+
+  return {
+    _id: player._id,
+    name: player.name,
+    mlbPlayerId: player.mlbPlayerId,
+    team: player.team,
+    mlbLeague: player.mlbLeague,
+    positions: player.positions,
+    injuryStatus: player.injuryStatus,
+    statsLastYear: player.statsLastYear,
+    stats3Year: player.stats3Year,
+    baseValue: player.baseValue,
+    isCustom: player.isCustom,
+    isDrafted: player.isDrafted,
+    isMlbRelevant: player.isMlbRelevant,
+    isActiveRoster: player.isActiveRoster,
+    headshotUrl: player.headshotUrl,
+    lastSyncedAt: player.lastSyncedAt,
+    transactions: player.transactions,
+    createdAt: player.createdAt,
+    updatedAt: player.updatedAt,
+  };
+}
+
 function withLeagueFilter(leagueType) {
   if (!leagueType) return {};
   return { mlbLeague: leagueType };
@@ -25,7 +53,6 @@ function withSearchFilter(escapedQuery) {
   return {
     $or: [
       { name: { $regex: escapedQuery, $options: 'i' } },
-      { canonicalName: { $regex: escapedQuery, $options: 'i' } },
       { team: { $regex: escapedQuery, $options: 'i' } },
       { positions: { $regex: escapedQuery, $options: 'i' } },
     ],
@@ -35,13 +62,15 @@ function withSearchFilter(escapedQuery) {
 async function listPlayers({ limit = 200, leagueType = null, includeInactive = false } = {}) {
   // This is the simple catalog listing endpoint used when the client wants a
   // general player sample rather than a team-specific valuation snapshot.
-  return Player.find({
+  const players = await Player.find({
     ...withLeagueFilter(leagueType),
     ...withActiveFilter(includeInactive),
   })
-    .sort({ baseValue: -1, canonicalName: 1, name: 1 })
+    .sort({ baseValue: -1, name: 1 })
     .limit(limit)
     .lean();
+
+  return players.map(serializePlayer);
 }
 
 async function searchPlayers({ escapedQuery, includeDrafted, includeInactive = false, limit = 200, leagueType = null }) {
@@ -53,7 +82,7 @@ async function searchPlayers({ escapedQuery, includeDrafted, includeInactive = f
   };
 
   let players = await Player.find(query)
-    .sort({ baseValue: -1, canonicalName: 1, name: 1 })
+    .sort({ baseValue: -1, name: 1 })
     .limit(limit)
     .lean();
 
@@ -66,13 +95,13 @@ async function searchPlayers({ escapedQuery, includeDrafted, includeInactive = f
       invalidateCatalogCache('search:');
       invalidateCatalogCache('players:');
       players = await Player.find(query)
-        .sort({ baseValue: -1, canonicalName: 1, name: 1 })
+        .sort({ baseValue: -1, name: 1 })
         .limit(limit)
         .lean();
     }
   }
 
-  return players;
+  return players.map(serializePlayer);
 }
 
 function buildPlayerLookup(playerId) {
@@ -103,7 +132,7 @@ async function getPlayerById(playerId) {
   if (!player) {
     throw new AppError('Player not found', 404);
   }
-  return player;
+  return serializePlayer(player);
 }
 
 async function getPlayerTransactions(playerId) {
@@ -126,5 +155,6 @@ module.exports = {
   getTeamDepthChart,
   getValuationSnapshot,
   listPlayers,
+  serializePlayer,
   searchPlayers,
 };

@@ -8,19 +8,9 @@ function dedupeStrings(values) {
   return Array.from(new Set(values.filter(Boolean)));
 }
 
-function buildEligibility(values) {
-  const eligibility = dedupeStrings(values.map(normalizePosition));
-  return eligibility.length > 0 ? eligibility : ['UTIL'];
-}
-
-function buildDepthRoleFromEntry(entry) {
-  const abbreviation = normalizePosition(entry?.position?.abbreviation || entry?.position?.code);
-  if (abbreviation === 'P') return 'PITCHER';
-
-  const normalizedType = normalizeWhitespace(entry?.position?.type).toLowerCase();
-  if (normalizedType.includes('outfield')) return 'OUTFIELDER';
-  if (normalizedType.includes('infield') || normalizedType.includes('catcher')) return 'INFIELDER';
-  return 'STARTER';
+function buildPositions(values) {
+  const positions = dedupeStrings(values.map(normalizePosition));
+  return positions.length > 0 ? positions : ['UTIL'];
 }
 
 function isStarterPremiumSlot(slot) {
@@ -60,9 +50,6 @@ function buildDepthIndex(depthEntries) {
       aggregate.depthRank = Math.min(aggregate.depthRank ?? Number.MAX_SAFE_INTEGER, index + 1);
       if (!aggregate.primarySlot || index === 0) {
         aggregate.primarySlot = slot;
-      }
-      if (!aggregate.depthRole) {
-        aggregate.depthRole = buildDepthRoleFromEntry(entry);
       }
       aggregate.status = normalizeWhitespace(entry?.status?.description || aggregate.status || '');
       aggregate.positions = dedupeStrings(aggregate.positions);
@@ -108,8 +95,7 @@ function normalizeDepthChart(depthEntries, activeRosterIds) {
 
 module.exports = {
   buildDepthIndex,
-  buildDepthRoleFromEntry,
-  buildEligibility,
+  buildPositions,
   isStarterPremiumSlot,
   normalizeDepthChart,
 };

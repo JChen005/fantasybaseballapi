@@ -4,11 +4,16 @@ This fixture package stores explicit Team A request payloads in the same shape t
 
 Those request fixtures follow the current backend semantics:
 
-- the selected valuation team is treated as `draftState.userTeamKey`
 - all excluded players across the league are sent
 - only the selected team's excluded players use `countsAgainstBudget: true`
 - every other team's excluded players remain excluded, but do **not** consume the selected team's budget
 - `filledSlots` reflects only the selected team's roster state
+
+Note:
+
+- the current Player API request parser does **not** consume `draftState.userTeamKey`
+- fixture payloads may still include that field for parity with upstream webapp payload shape
+- valuation logic only reads the normalized fields retained by `parseValuationRequest()`
 
 ## Files
 
@@ -31,6 +36,26 @@ Those request fixtures follow the current backend semantics:
 - `../../valuation-fixtures.test.js`
   - Validates that the checked-in Team A payloads exist, stay parseable, and still match the expected backend semantics.
 
+## Request fields the valuation service actually uses
+
+After validation/normalization, the valuation service reads:
+
+- `league.budget`
+- `league.teamCount`
+- `league.leagueType`
+- `league.rosterSlots`
+- `league.dollarablePoolShare`
+- `filters.limit`
+- `filters.includeInactive`
+- `filters.search`
+- `draftState.excludedPlayers[*].playerId`
+- `draftState.excludedPlayers[*].status`
+- `draftState.excludedPlayers[*].cost`
+- `draftState.excludedPlayers[*].countsAgainstBudget`
+- `draftState.filledSlots`
+
+That means extra webapp metadata such as `teamKey` or `playerName` can still be present in the checked-in fixture payloads, but valuation itself does not read those fields after parsing.
+
 ## Important normalization choices
 
 - Spreadsheet `U` is normalized to `UTIL`.
@@ -43,6 +68,7 @@ Those request fixtures follow the current backend semantics:
   - `OF`
   - `P`
   - `UTIL`
+- Omitted `league.dollarablePoolShare` defaults to `0.3` in request validation.
 - Only rows with a visible keeper contract/cost are treated as excluded pre-draft keepers.
 - Minors are included as excluded pre-draft reserve players with:
   - `status: 'MINOR'`
@@ -74,3 +100,13 @@ The checked-in request fixtures cover:
 - `team-a/after-50.request.json`
 - `team-a/after-100.request.json`
 - `team-a/after-130.request.json`
+
+## What the fixtures are validating
+
+These fixtures are primarily intended to validate that:
+
+- request payloads remain parseable by `parseValuationRequest()`
+- excluded players are removed from the remaining market
+- only `countsAgainstBudget: true` exclusions reduce the selected team's budget
+- `remainingBudget`, `remainingRosterSpots`, and `maxBid` evolve correctly through draft stages
+- tracked available players change `adjustedValue` as the room state changes

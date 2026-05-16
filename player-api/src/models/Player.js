@@ -26,9 +26,7 @@ const transactionSchema = new mongoose.Schema(
 const playerSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, index: true },
-    canonicalName: { type: String, required: true, index: true },
     mlbPlayerId: { type: Number, required: true },
-    mlbTeamId: { type: Number, index: true },
     team: { type: String, required: true, index: true },
     mlbLeague: {
       type: String,
@@ -37,9 +35,7 @@ const playerSchema = new mongoose.Schema(
       index: true,
     },
     positions: { type: [String], required: true },
-    eligibility: { type: [String], default: [] },
     injuryStatus: { type: String, default: 'HEALTHY' },
-    depthRole: { type: String, default: 'STARTER' },
     statsLastYear: { type: statSchema, required: true },
     stats3Year: { type: statSchema, required: true },
     baseValue: { type: Number, required: true },
@@ -47,10 +43,7 @@ const playerSchema = new mongoose.Schema(
     isDrafted: { type: Boolean, default: false },
     isMlbRelevant: { type: Boolean, default: true, index: true },
     isActiveRoster: { type: Boolean, default: true, index: true },
-    rosterStatus: { type: String, default: 'ACTIVE', index: true },
-    sourceRosterScope: { type: String, default: 'ACTIVE', index: true },
     headshotUrl: { type: String, default: '' },
-    dataSources: { type: [String], default: ['mlbStatsApi'] },
     lastSeenInSyncAt: { type: Date, index: true },
     lastSyncedAt: { type: Date },
     transactions: { type: [transactionSchema], default: [] },
