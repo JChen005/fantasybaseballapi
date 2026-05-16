@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const globalCache = globalThis.__draftkitPlayerApiDb || {
   connection: null,
@@ -8,26 +8,29 @@ const globalCache = globalThis.__draftkitPlayerApiDb || {
 globalThis.__draftkitPlayerApiDb = globalCache;
 
 async function connectDb() {
+  // reuse existing connection
   if (globalCache.connection) {
     return globalCache.connection;
   }
 
   const uri = process.env.MONGODB_URI;
   if (!uri) {
-    throw new Error('MONGODB_URI is required');
+    throw new Error("MONGODB_URI is required");
   }
 
+  // start connection if none
   if (!globalCache.promise) {
     globalCache.promise = mongoose
       .connect(uri, {
         serverSelectionTimeoutMS: 10000,
       })
       .then((instance) => {
-        console.log('Connected to MongoDB');
+        console.log("Connected to MongoDB");
         return instance.connection;
       });
   }
 
+  // store shared connection in global cache
   globalCache.connection = await globalCache.promise;
   return globalCache.connection;
 }

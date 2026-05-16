@@ -9,6 +9,34 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function normalizePositiveInteger(value, errorMessage) {
+  const parsed = Number(value);
+  if (Number.isInteger(parsed) && parsed > 0) {
+    return parsed;
+  }
+
+  throw new AppError(errorMessage, 400);
+}
+
+function normalizePlayerReference(playerId, errorMessage) {
+  if (playerId == null || playerId === '') {
+    throw new AppError(errorMessage, 400);
+  }
+
+  const normalized = String(playerId).trim();
+  if (!normalized) {
+    throw new AppError(errorMessage, 400);
+  }
+
+  if (mongoose.isValidObjectId(normalized)) {
+    return normalized;
+  }
+
+  // Many webapp flows send MLB ids, but some internal/admin flows may still use
+  // Mongo ObjectIds. This helper accepts either form on purpose.
+  return normalizePositiveInteger(normalized, errorMessage);
+}
+
 function parseLimit(rawLimit, fallback = 200) {
   const parsed = Number(rawLimit ?? fallback);
   if (!Number.isFinite(parsed)) {
@@ -34,6 +62,7 @@ function parseSearchQuery(query = {}) {
   const raw = String(query.q ?? '').trim();
   const q = raw.length > 80 ? raw.slice(0, 80) : raw;
 
+  // We trim and cap search text here so downstream regex queries stay bounded.
   return {
     includeDrafted,
     includeInactive,
@@ -59,51 +88,15 @@ function parseIncludeInactive(rawIncludeInactive) {
 }
 
 function validatePlayerId(playerId) {
-  const normalized = String(playerId || '').trim();
-  if (!normalized) {
-    throw new AppError('Invalid player ID', 400);
-  }
-
-  if (mongoose.isValidObjectId(normalized)) {
-    return normalized;
-  }
-
-  const numericId = Number(normalized);
-  if (Number.isInteger(numericId) && numericId > 0) {
-    return numericId;
-  }
-
-  throw new AppError('Invalid player ID', 400);
+  return normalizePlayerReference(playerId, 'Invalid player ID');
 }
 
 function validateTeamId(teamId) {
-  const numericId = Number(teamId);
-  if (!Number.isInteger(numericId) || numericId <= 0) {
-    throw new AppError('Invalid team ID', 400);
-  }
-  return numericId;
+  return normalizePositiveInteger(teamId, 'Invalid team ID');
 }
 
 function validatePlayerReference(playerId, fieldName = 'playerId') {
-  if (playerId == null || playerId === '') {
-    throw new AppError(`Invalid ${fieldName}`, 400);
-  }
-
-  const normalized = String(playerId).trim();
-  if (!normalized) {
-    throw new AppError(`Invalid ${fieldName}`, 400);
-  }
-
-  if (mongoose.isValidObjectId(normalized)) {
-    return normalized;
-  }
-
-  const numericId = Number(normalized);
-  if (Number.isInteger(numericId) && numericId > 0) {
-    return numericId;
-  }
-
-  throw new AppError(`Invalid ${fieldName}`, 400);
+  return normalizePlayerReference(playerId, `Invalid ${fieldName}`);
 }
 
 function parseRosterSlots(rosterSlots) {
@@ -114,6 +107,8 @@ function parseRosterSlots(rosterSlots) {
   const normalized = {};
   let totalSlots = 0;
 
+  // Keep the input shape flexible, but normalize all slot counts to integers
+  // before valuation logic consumes them.
   for (const [slot, rawValue] of Object.entries(rosterSlots)) {
     const parsed = Number(rawValue);
     if (!Number.isInteger(parsed) || parsed < 0) {
@@ -132,6 +127,7 @@ function parseRosterSlots(rosterSlots) {
 
 function parseDollarablePoolShare(rawValue) {
   if (rawValue == null || rawValue === '') {
+    // This default is part of the endpoint contract and is covered by tests.
     return 0.3;
   }
 
@@ -171,6 +167,8 @@ function parseFilledSlots(rawFilledSlots, rosterSlots) {
 }
 
 function parseValuationRequest(body = {}) {
+  // This parser is the main compatibility boundary with the webapp.
+  // Normalize here so the valuation service can stay focused on pricing logic.
   const league = body.league;
   if (!league || typeof league !== 'object' || Array.isArray(league)) {
     throw new AppError('league is required', 400);
@@ -218,6 +216,9 @@ function parseValuationRequest(body = {}) {
 
     const countsAgainstBudget = Boolean(entry.countsAgainstBudget);
 
+    // Keep only the fields the pricing model actually uses. The webapp may
+    // send extra metadata like teamKey or playerName, but valuation itself only
+    // needs availability state, budget impact, and the player reference.
     return {
       playerId: validatePlayerReference(entry.playerId, `draftState.excludedPlayers[${index}].playerId`),
       status,

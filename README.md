@@ -89,7 +89,6 @@ Common optional flags:
 - `POST /v1/valuations/players`
 - `GET /v1/players/:playerId`
 - `GET /v1/players/:playerId/transactions`
-- `GET /v1/stats/league-averages`
 - `GET /v1/teams/:teamId/depth-chart`
 - `GET /v1/stream/transactions`
 
